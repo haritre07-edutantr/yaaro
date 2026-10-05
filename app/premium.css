@@ -92,3 +92,14 @@ html[data-motion=on] .yaaro-social .real-bottom>button.active>span{animation:pre
 @media(max-width:360px){.connection-note{font-size:.72rem;padding:12px}.connect-kicker{letter-spacing:.03em}.yaaro-social .home-conversation-name time{display:none}.yaaro-social .connect-mode-picker small{font-size:.62rem}}
 @media(prefers-reduced-motion:reduce){html[data-motion] .yaaro-social .social-page,html[data-motion] .connection-art *,html[data-motion] .yaaro-social .real-bottom>button.active>span{animation:none!important}.yaaro-social *, .yaaro-social *:before,.yaaro-social *:after{scroll-behavior:auto!important;transition-duration:.01ms!important}}
 html[data-motion=off] .connection-art *,html.motion-paused .connection-art *{animation-play-state:paused!important}
+/* Circle items use identical geometry for photos and initial avatars. */
+.yaaro-social .everyday-home .circle-strip,html[data-theme=dark] .yaaro-social .everyday-home .circle-strip{display:flex;align-items:flex-start;gap:14px;padding:6px 2px 14px;margin-bottom:13px;background:transparent;border:0;border-radius:0;box-shadow:none;overflow-x:auto;scrollbar-width:none}
+.yaaro-social .everyday-home .circle-person{display:grid;grid-template-rows:58px 20px;justify-items:center;align-items:center;gap:8px;flex:0 0 68px;width:68px;min-width:68px;padding:0}
+.yaaro-social .everyday-home .circle-ring,html[data-theme=dark] .yaaro-social .everyday-home .circle-ring{display:grid;place-items:center;position:relative;width:58px;height:58px;padding:3px;border:2px solid var(--surface-border);border-radius:50%;background:transparent;line-height:1;flex:none}
+.yaaro-social .everyday-home .circle-person.own .circle-ring,html[data-theme=dark] .yaaro-social .everyday-home .circle-person.own .circle-ring{border-color:transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,#1769e0,#12c7b5) border-box}
+.yaaro-social .everyday-home .circle-person.online .circle-ring{border-color:#12b8a8}
+.yaaro-social .everyday-home .circle-ring>.avatar{display:grid;place-items:center;width:48px;height:48px;min-width:48px;aspect-ratio:1;border-radius:50%;line-height:1;margin:0;font-size:1.12rem;overflow:hidden;flex:none}
+.yaaro-social .everyday-home .circle-ring>.avatar>img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;margin:0}
+.yaaro-social .everyday-home .circle-person>b{display:block;width:68px;max-width:68px;height:20px;line-height:20px;margin:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary);font-size:.69rem}
+.yaaro-social .everyday-home .circle-ring>i,html[data-theme=dark] .yaaro-social .everyday-home .circle-ring>i{width:19px;height:19px;right:-2px;bottom:-1px;display:grid;place-items:center;border:2px solid var(--bg);z-index:1}
+.yaaro-social .home-circle-heading{align-items:baseline;flex-wrap:wrap;gap:6px 12px}
