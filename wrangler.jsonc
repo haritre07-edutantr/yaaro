@@ -25,7 +25,7 @@
     "SUPABASE_URL": "https://zpxfagfrkqbnwgdbygep.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xlz8Fp7voma3vV1Ur0fdqQ_TGd4gemy",
     "PUBLIC_APP_ORIGIN": "https://autumn-lake-80feyaaro.haritre07.workers.dev",
-    "AUTH_EMAIL_DELIVERY_READY": "false",
+    "AUTH_EMAIL_DELIVERY_READY": "true",
     "SUPER_ADMIN_USER_ID": ""
   }
 }
