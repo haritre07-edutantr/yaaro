@@ -1,0 +1,6 @@
+import {z} from 'zod';
+import {db,identity,guard,payload,failure} from '@/lib/server';
+import {actionSchema} from '@/lib/community-model';
+import {CommunityService} from '@/lib/community-service';
+export async function GET(req:Request){try{const u=await identity();if(!u)throw new Error('UNAUTHORIZED');const service=new CommunityService(db(),u.userId);const url=new URL(req.url);const conversation=url.searchParams.get('conversation');if(conversation){const before=url.searchParams.get('before');return Response.json({messages:await service.messages(z.string().max(100).parse(conversation),before?z.coerce.number().finite().positive().parse(before):undefined)},{headers:{'Cache-Control':'no-store'}});}const q=z.object({q:z.string().max(100).optional(),vibe:z.string().max(40).optional(),language:z.string().max(30).optional(),interest:z.string().max(30).optional(),offset:z.coerce.number().int().min(0).max(10000).optional()}).parse(Object.fromEntries(url.searchParams));return Response.json(await service.snapshot(q),{headers:{'Cache-Control':'no-store'}});}catch(e){return failure(e);}}
+export async function POST(req:Request){try{const u=await guard(req);const action=actionSchema.parse(await payload(req));return Response.json(await new CommunityService(db(),u.userId).act(action));}catch(e){return failure(e);}}

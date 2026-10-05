@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yaaro",
+  "main": "build/public-worker.ts",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "yaaro",
+      "database_id": "00000000-0000-4000-8000-000000000000",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "yaaro-profile-photos"
+    }
+  ],
+  "vars": {
+    "SUPABASE_URL": "https://zpxfagfrkqbnwgdbygep.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xlz8Fp7voma3vV1Ur0fdqQ_TGd4gemy",
+    "PUBLIC_APP_ORIGIN": "",
+    "AUTH_EMAIL_DELIVERY_READY": "false",
+    "SUPER_ADMIN_USER_ID": ""
+  }
+}

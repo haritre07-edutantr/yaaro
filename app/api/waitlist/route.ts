@@ -1,0 +1,3 @@
+import {z} from 'zod';
+import { db, guard, failure, payload } from '@/lib/server';
+export async function POST(req:Request){try{const u=await guard(req);const b=z.object({company:z.string().trim().min(1).max(120),email:z.string().email().max(254)}).parse(await payload(req));if(typeof b.company!=='string'||!b.company.trim()||b.company.length>120||typeof b.email!=='string'||b.email.length>254||!/^\S+@\S+\.\S+$/.test(b.email))throw new Error('INVALID');await db().prepare('INSERT INTO business_waitlist (owner, company, email, created_at) VALUES (?, ?, ?, ?) ON CONFLICT(owner) DO UPDATE SET company = excluded.company, email = excluded.email').bind(u.userId,b.company,b.email,Date.now()).run();return Response.json({saved:true});}catch(e){return failure(e);}}
