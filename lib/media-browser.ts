@@ -8,3 +8,12 @@ export async function captureVoice():Promise<VoiceCapture>{
  return {cancel(){if(stopped)return;stopped=true;close();},async stop(){if(stopped)throw new Error('Recording cancelled.');stopped=true;await new Promise<void>(resolve=>{const timeout=setTimeout(resolve,1000);finish=()=>{clearTimeout(timeout);resolve();};node.port.postMessage('flush');});close();if(!chunks.length)throw new Error('No audio was recorded.');const bytes=encodeVoice(chunks,context!.sampleRate);if(bytes.length<3244)throw new Error('Record at least a short hello.');return new Blob([bytes],{type:'audio/wav'});}};
  }catch(error){stream.getTracks().forEach(track=>track.stop());void context?.close();throw error;}
 }
+
+export async function prepareMomentVideo(file:File){
+ if(file.type!=='video/mp4'||file.size>12*1024*1024)throw new Error('Choose an MP4 video under 12 MB.');
+ const {validateMomentVideo}=await import('./moment-video');
+ try{validateMomentVideo(new Uint8Array(await file.arrayBuffer()));}catch(e){throw new Error((e as Error).message==='VIDEO_TOO_LONG'?'Videos can be no longer than 10 seconds.':'Choose a standard H.264 MP4 video, up to 10 seconds long.');}
+ const url=URL.createObjectURL(file),video=document.createElement('video');video.preload='metadata';
+ try{await new Promise<void>((resolve,reject)=>{const timeout=setTimeout(()=>reject(new Error('Unable to read this video. Try another MP4.')),10000);video.onloadedmetadata=()=>{clearTimeout(timeout);Number.isFinite(video.duration)&&video.duration>0&&video.duration<=10?resolve():reject(new Error('Videos can be no longer than 10 seconds.'));};video.onerror=()=>{clearTimeout(timeout);reject(new Error('This video cannot play in your browser. Choose another MP4.'));};video.src=url;});return file;}
+ finally{video.removeAttribute('src');video.load();URL.revokeObjectURL(url);}
+}
