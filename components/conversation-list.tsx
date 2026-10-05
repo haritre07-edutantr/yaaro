@@ -1,0 +1,22 @@
+'use client';
+import {useState} from 'react';
+import {Search,Pin,Star,MessageCircle,ChevronRight} from 'lucide-react';
+import {MemberAvatar} from './profile-photo';
+import {conversationGroups} from '@/lib/conversation-list';
+import type {Friendship} from '@/lib/community-model';
+type Props={friends:Friendship[];activeId?:string;busy:boolean;onSelect:(friend:Friendship)=>void;onPreference:(friend:Friendship,kind:'pin'|'favorite',enabled:boolean)=>void};
+function messageTime(timestamp:number){const date=new Date(timestamp);return date.toDateString()===new Date().toDateString()?date.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):date.toLocaleDateString([],{month:'short',day:'numeric'});}
+export default function ConversationList({friends,activeId,busy,onSelect,onPreference}:Props){
+ const [query,setQuery]=useState(''),[favoritesOnly,setFavoritesOnly]=useState(false);
+ const pins=friends.filter(f=>f.pinned).length,favorites=friends.filter(f=>f.favorite).length,groups=conversationGroups(friends,query,favoritesOnly);
+ return <aside className="inbox-sidebar" aria-label="Your conversations">
+  <div className="inbox-title"><div><span className="eyebrow">YOUR INNER CIRCLE</span><h2>Yaaros <span>{friends.length}</span></h2></div><MessageCircle size={23}/></div>
+  <label className="inbox-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Find a Yaaro" aria-label="Search conversations"/></label>
+  <div className="inbox-tabs"><button className={!favoritesOnly?'selected':''} aria-pressed={!favoritesOnly} onClick={()=>setFavoritesOnly(false)}>All chats</button><button className={favoritesOnly?'selected':''} aria-pressed={favoritesOnly} onClick={()=>setFavoritesOnly(true)}><Star size={14}/> Favorites</button></div>
+  <div className="inbox-capacity"><span><Pin size={13}/> {pins}/2 pinned</span><span><Star size={13}/> {favorites}/3 favorites</span></div>
+  <div className="inbox-rows">{groups.map(group=>!!group.items.length&&<section key={group.title} aria-label={group.title}><div className="inbox-section-title"><h3>{group.title}</h3><span>{group.items.length}</span></div>{group.items.map(friend=><div key={friend.id} className={`conversation-row ${activeId===friend.id?'selected':''}`}>
+   <button className="conversation-open" onClick={()=>onSelect(friend)} aria-label={`Open conversation with ${friend.person.name}`} aria-pressed={activeId===friend.id}><MemberAvatar member={friend.person} size="small"/><span className="conversation-copy"><span className="conversation-name"><b>{friend.person.name}</b>{friend.lastMessage&&<time dateTime={new Date(friend.lastMessage.createdAt).toISOString()}>{messageTime(friend.lastMessage.createdAt)}</time>}</span><span className="conversation-preview">{friend.lastMessage?(friend.lastMessage.deleted?'Message deleted':`${friend.lastMessage.own?'You: ':''}${friend.lastMessage.body}`):`Say hello · ${friend.person.vibe}`}</span><span className="conversation-badges">{friend.person.online&&<span>Online now</span>}{friend.pinned&&<Pin size={11} aria-label="Pinned"/>}{friend.favorite&&<Star size={11} aria-label="Favorite"/>}</span></span>{!!friend.unreadCount?<span className="conversation-unread" aria-label={`${friend.unreadCount} unread messages`}>{friend.unreadCount>99?'99+':friend.unreadCount}</span>:<ChevronRight size={15} className="conversation-chevron"/>}</button>
+   <div className="conversation-actions"><button className={`icon-button ${friend.pinned?'is-pinned':''}`} disabled={busy} aria-label={`${friend.pinned?'Unpin':'Pin'} ${friend.person.name}`} aria-pressed={!!friend.pinned} title={friend.pinned?'Unpin conversation':'Pin conversation · up to 2'} onClick={()=>onPreference(friend,'pin',!friend.pinned)}><Pin size={16}/></button><button className={`icon-button ${friend.favorite?'is-favorite':''}`} disabled={busy} aria-label={`${friend.favorite?'Remove':'Add'} ${friend.person.name} ${friend.favorite?'from':'to'} favorites`} aria-pressed={!!friend.favorite} title={friend.favorite?'Remove favorite':'Add favorite · up to 3'} onClick={()=>onPreference(friend,'favorite',!friend.favorite)}><Star size={16}/></button></div>
+  </div>)}</section>)}{groups.every(g=>!g.items.length)&&<div className="inbox-empty"><Search size={25}/><h3>{query?'No Yaaros found.':'Your favorites start here.'}</h3><p>{query?'Try a different name or vibe.':'Tap the star beside a Yaaro to keep them close.'}</p></div>}</div>
+ </aside>;
+}

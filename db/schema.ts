@@ -1,4 +1,5 @@
-import { sqliteTable, text, integer, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import {sql} from 'drizzle-orm';
+import { sqliteTable, text, integer, index, uniqueIndex, primaryKey, check } from 'drizzle-orm/sqlite-core';
 export const workspaces = sqliteTable('demo_workspaces', { owner: text('owner').primaryKey(), data: text('data').notNull(), updatedAt: integer('updated_at').notNull() });
 export const reports = sqliteTable('reports', { id:text('id').primaryKey(), owner:text('owner').notNull(), target:text('target').notNull(), category:text('category').notNull(), description:text('description').notNull(), status:text('status').notNull().default('Pending'), createdAt:integer('created_at').notNull() },t=>[index('idx_reports_owner').on(t.owner)]);
 export const audit = sqliteTable('audit_logs', { id:text('id').primaryKey(), actor:text('actor').notNull(), action:text('action').notNull(), target:text('target').notNull(), createdAt:integer('created_at').notNull() });
@@ -13,3 +14,5 @@ export const realBlocks=sqliteTable('member_blocks',{id:text('id').primaryKey(),
 export const reactions=sqliteTable('chat_reactions',{id:text('id').primaryKey(),message:text('message').notNull(),member:text('member').notNull(),emoji:text('emoji').notNull()},t=>[index('idx_reactions_message').on(t.message)]);
 
 export const callSessions=sqliteTable('call_sessions',{id:text('id').primaryKey(),conversation:text('conversation').notNull(),caller:text('caller').notNull(),callee:text('callee').notNull(),mode:text('mode').notNull(),state:text('state').notNull().default('ringing'),offer:text('offer'),answer:text('answer'),createdAt:integer('created_at').notNull(),updatedAt:integer('updated_at').notNull()},t=>[index('idx_calls_caller_state').on(t.caller,t.state),index('idx_calls_callee_state').on(t.callee,t.state)]);
+
+export const chatPreferences=sqliteTable('chat_preferences',{member:text('member').notNull().references(()=>members.id,{onDelete:'cascade'}),target:text('target').notNull().references(()=>members.id,{onDelete:'cascade'}),pinned:integer('pinned').notNull().default(0),favorite:integer('favorite').notNull().default(0),updatedAt:integer('updated_at').notNull()},t=>[primaryKey({columns:[t.member,t.target]}),check('chat_preferences_flags',sql`${t.pinned} IN (0, 1) AND ${t.favorite} IN (0, 1)`)]);
