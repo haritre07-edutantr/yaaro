@@ -180,3 +180,7 @@ html[data-theme=dark] .pending-retry{color:#91c3ff}
 .sound-setting small{width:22px;font-size:.67rem;color:var(--text-secondary)}
 .sound-preferences>p{font-size:.7rem;line-height:1.6;color:var(--text-secondary);margin-top:10px}
 .sound-preferences>.text-link{min-height:40px;font-size:.77rem}
+.real-call-controls{flex-wrap:wrap;gap:10px}
+.real-call-controls .icon-button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink)}
+.real-video-grid>video:nth-child(2){transform:none}
+.real-video-grid video.local-camera-front{transform:scaleX(-1)}
