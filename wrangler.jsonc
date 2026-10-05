@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "yaaro",
+  "name": "autumn-lake-80feyaaro",
   "main": "build/public-worker.ts",
   "compatibility_date": "2026-05-15",
   "compatibility_flags": [
@@ -24,7 +24,7 @@
   "vars": {
     "SUPABASE_URL": "https://zpxfagfrkqbnwgdbygep.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xlz8Fp7voma3vV1Ur0fdqQ_TGd4gemy",
-    "PUBLIC_APP_ORIGIN": "",
+    "PUBLIC_APP_ORIGIN": "https://autumn-lake-80feyaaro.haritre07.workers.dev",
     "AUTH_EMAIL_DELIVERY_READY": "false",
     "SUPER_ADMIN_USER_ID": ""
   }
