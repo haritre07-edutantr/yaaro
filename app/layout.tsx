@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import CallProvider from '@/components/call-provider';
 import { MotionProvider } from "@/components/motion";
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased"><MotionProvider>{children}</MotionProvider></body>
+      <body className="antialiased"><MotionProvider><CallProvider>{children}</CallProvider></MotionProvider></body>
     </html>
   );
 }

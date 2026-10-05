@@ -13,6 +13,7 @@ export type CallRow={id:string;conversation:string;caller:string;callee:string;m
 export class CallService{
  private community:CommunityService;constructor(private db:D1Database,owner:string){this.community=new CommunityService(db,owner);}
  private stmt(sql:string,...v:any[]){return this.db.prepare(sql).bind(...v);}
+ async self(){return this.community.publicMember(await this.community.memberId());}
  async expire(){await this.stmt("UPDATE call_sessions SET state = 'ended', offer = NULL, answer = NULL WHERE state IN ('ringing','connecting','active') AND (updated_at < ? OR created_at < ?)",Date.now()-65000,Date.now()-3600000).run();}
  async access(id:string){const me=await this.community.memberId();const c=await this.stmt('SELECT * FROM call_sessions WHERE id = ? AND (caller = ? OR callee = ?)',id,me,me).first<CallRow>();if(!c)throw new Error('FORBIDDEN');await this.community.conversationAccess(c.conversation,true);return {c,me};}
  async get(id?:string){await this.expire();const me=await this.community.memberId();const c=id?(await this.access(id)).c:await this.stmt("SELECT * FROM call_sessions WHERE callee = ? AND state = 'ringing' AND offer IS NOT NULL ORDER BY created_at DESC LIMIT 1",me).first<CallRow>();if(!c)return null;await this.community.conversationAccess(c.conversation,true);return {...c,peer:await this.community.publicMember(c.caller===me?c.callee:c.caller)};}

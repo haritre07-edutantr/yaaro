@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
+import ts from 'typescript';
+const dir=new URL('../.sites-runtime/incoming-tests/',import.meta.url);mkdirSync(dir,{recursive:true});
+writeFileSync(new URL('incoming.mjs',dir),ts.transpileModule(readFileSync(new URL('../lib/incoming-calls.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText);
+const {watchIncomingCalls}=await import(new URL('incoming.mjs',dir));
+const windowEvents=new EventTarget(),documentEvents=new EventTarget();
+const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+let busy=false,online=true,requests=0;const delivered=[];let resolvePending;
+const stop=watchIncomingCalls({load:()=>{requests++;return new Promise(resolve=>{resolvePending=resolve;});},isBusy:()=>busy,isOnline:()=>online,onIncoming:call=>delivered.push(call),windowEvents,documentEvents,pollMs:60000});
+windowEvents.dispatchEvent(new Event('focus'));assert.equal(requests,1,'Foreground events do not duplicate an in-flight request');
+resolvePending({id:'call-from-a-different-chat'});await tick();assert.equal(delivered[0].id,'call-from-a-different-chat');
+busy=true;windowEvents.dispatchEvent(new Event('focus'));assert.equal(requests,1,'An ongoing call prevents overlapping incoming calls');
+busy=false;documentEvents.dispatchEvent(new Event('visibilitychange'));assert.equal(requests,2,'Checks resume after a call ends, regardless of the open page');resolvePending(null);await tick();assert.equal(delivered[1],null);
+online=false;windowEvents.dispatchEvent(new Event('focus'));assert.equal(requests,2);online=true;windowEvents.dispatchEvent(new Event('online'));assert.equal(requests,3);
+stop();resolvePending({id:'late-response'});await tick();assert.equal(delivered.length,2,'Responses after logout/unmount are ignored');windowEvents.dispatchEvent(new Event('focus'));assert.equal(requests,3,'Stopped listeners release event handlers');
+console.log('Global incoming-call delivery, busy recovery, foreground wakeup, offline and cleanup checks passed');
