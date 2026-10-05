@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "deploy": "node scripts/check-deploy.mjs && wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "test": "node scripts/test-community.mjs && node scripts/test-auth.mjs && node scripts/test-turn.mjs && node scripts/test-call-media.mjs",
+    "test": "node scripts/test-community.mjs && node scripts/test-auth.mjs && node scripts/test-turn.mjs && node scripts/test-call-media.mjs && node scripts/test-call-ice.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply yaaro --local",
     "db:migrate:remote": "wrangler d1 migrations apply yaaro --remote"

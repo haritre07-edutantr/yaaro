@@ -24,7 +24,7 @@ export async function relayServers(s: Settings, callId:string, memberId:string, 
         for(const item of data.iceServers||[]) {
           if(typeof item.username!=='string'||typeof item.credential!=='string'||!item.username||!item.credential)continue;
           const input=Array.isArray(item.urls)?item.urls:[item.urls];
-          const urls=input.filter((u):u is string=>typeof u==='string'&&/^turns?:turn\.cloudflare\.com:(3478|443|80)(\?transport=(udp|tcp))?$/.test(u));
+          const urls=input.filter((u):u is string=>typeof u==='string'&&/^turns?:turn\.cloudflare\.com:(3478|443|80|5349)(\?transport=(udp|tcp))?$/.test(u));
           if(urls.length)servers.push({urls,username:item.username,credential:item.credential});
         }
         if(!servers.length)throw new Error('CALLS_UNAVAILABLE');
