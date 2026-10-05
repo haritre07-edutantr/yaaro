@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./social.css";
+import "./theme.css";
+import {ThemeProvider} from "@/components/theme";
 import CallProvider from '@/components/call-provider';
 import { MotionProvider } from "@/components/motion";
 
@@ -22,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased"><MotionProvider><CallProvider>{children}</CallProvider></MotionProvider></body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased"><ThemeProvider><MotionProvider><CallProvider>{children}</CallProvider></MotionProvider></ThemeProvider></body>
     </html>
   );
 }
