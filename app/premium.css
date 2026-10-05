@@ -145,3 +145,25 @@ html[data-theme=dark] .yaaro-social .profile-interest-tile.tile-tone-2{backgroun
 .yaaro-social .real-bottom>.main-connect>span>svg{display:block;width:21px;height:21px;color:#fff}
 .yaaro-social .real-bottom>.main-connect>small{color:#1769e0}
 html[data-theme=dark] .yaaro-social .real-bottom>.main-connect>small{color:#72afff}
+/* A readable privacy control, with a visible thumb in both switch states. */
+.yaaro-social .chat-privacy-bar,html[data-theme=dark] .yaaro-social .chat-privacy-bar{display:grid;grid-template-columns:32px minmax(0,1fr) 52px;align-items:center;gap:10px;padding:12px 16px;background:var(--surface-soft);border-bottom:1px solid var(--surface-border);transition:background .2s}
+.yaaro-social .chat-privacy-bar.is-enabled,html[data-theme=dark] .yaaro-social .chat-privacy-bar.is-enabled{background:var(--accent-soft)}
+.chat-privacy-icon{display:grid;place-items:center;width:32px;height:36px;border-radius:10px;background:var(--surface);color:var(--text-secondary)}
+.is-enabled .chat-privacy-icon{color:var(--accent-ink)}
+.chat-privacy-copy{min-width:0}
+.chat-privacy-copy>b{display:block;font-size:.77rem;font-weight:700;line-height:1.4;color:var(--text-primary)}
+.yaaro-social .chat-privacy-copy>small,html[data-theme=dark] .yaaro-social .chat-privacy-copy>small{display:block;margin-top:4px;font-size:.67rem;line-height:1.6;color:var(--text-secondary)}
+.chat-privacy-control{display:flex;flex-direction:column;align-items:center;gap:0;min-width:52px}
+.chat-privacy-state{display:block;font-size:.64rem;font-weight:750;line-height:16px;color:var(--text-secondary)}
+.is-enabled .chat-privacy-state{color:var(--accent-ink)}
+.yaaro-social .chat-privacy-toggle,html[data-theme=dark] .yaaro-social .chat-privacy-toggle{display:grid;place-items:center;width:52px;height:44px;padding:0;border:0;background:transparent;border-radius:12px;flex-shrink:0;box-shadow:none}
+.yaaro-social .chat-switch-track{display:block;width:46px;height:26px;border-radius:20px;padding:3px;background:#8b9cb0;box-shadow:inset 0 0 0 1px #60768d22;transition:background .2s,box-shadow .2s}
+html[data-theme=dark] .yaaro-social .chat-switch-track{background:#455873;box-shadow:inset 0 0 0 1px #7189a666}
+.yaaro-social .chat-privacy-toggle[aria-checked=true] .chat-switch-track,html[data-theme=dark] .yaaro-social .chat-privacy-toggle[aria-checked=true] .chat-switch-track{background:linear-gradient(135deg,#1769e0,#0aa99f);box-shadow:0 2px 9px #12c7b526}
+.yaaro-social .chat-switch-track>i,html[data-theme=dark] .yaaro-social .chat-switch-track>i{display:block;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #00000030;transform:translateX(0);transition:transform .22s var(--premium-ease)}
+.yaaro-social .chat-privacy-toggle[aria-checked=true] .chat-switch-track>i{transform:translateX(20px)}
+.yaaro-social .chat-privacy-toggle:disabled{opacity:.65}
+.chat-privacy-error{grid-column:1/-1;font-size:.73rem;line-height:1.5;color:#d14457}
+html[data-theme=dark] .chat-privacy-error{color:#ffa6b3}
+@media(max-width:720px){.yaaro-social .chat-privacy-bar,html[data-theme=dark] .yaaro-social .chat-privacy-bar{padding:11px 12px;gap:9px}}
+@media(max-width:360px){.yaaro-social .chat-privacy-bar,html[data-theme=dark] .yaaro-social .chat-privacy-bar{grid-template-columns:minmax(0,1fr) 52px}.chat-privacy-icon{display:none}}

@@ -1,11 +1,11 @@
 'use client';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useRef,useState,useId} from 'react';
 import {Eye,Image,Video,Timer,Lock} from 'lucide-react';
 import {Modal} from './ui';
 import {api} from '@/lib/services';
 import type {ChatMessage,Friendship} from '@/lib/community-model';
 export function ChatPrivacy({friend,messages,me,onChanged}:{friend:Friendship;messages:ChatMessage[];me:string;onChanged:()=>Promise<void>}){
- const [busy,setBusy]=useState(false),[error,setError]=useState(''),[visibilityVersion,setVisibilityVersion]=useState(0);const seen=useRef(new Set<string>()),pending=useRef(new Set<string>()),chain=useRef(Promise.resolve()),alive=useRef(true),visible=useRef(true);
+ const descriptionId=useId();const [busy,setBusy]=useState(false),[error,setError]=useState(''),[visibilityVersion,setVisibilityVersion]=useState(0);const seen=useRef(new Set<string>()),pending=useRef(new Set<string>()),chain=useRef(Promise.resolve()),alive=useRef(true),visible=useRef(true);
  const send=(action:string,ids:string[]=[])=>fetch('/api/community',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,conversation:friend.id,ids}),keepalive:true}).then(response=>{if(!response.ok)throw new Error('Chat privacy update could not be saved.');});
  const read=(ids:string[])=>{ids.forEach(id=>pending.current.add(id));chain.current=chain.current.catch(()=>{}).then(async()=>{if(!alive.current||!visible.current)return;await send('read',ids);ids.forEach(id=>pending.current.delete(id));}).catch(()=>{});};
  useEffect(()=>{
@@ -23,7 +23,7 @@ export function ChatPrivacy({friend,messages,me,onChanged}:{friend:Friendship;me
   root.querySelectorAll('[data-message-id]').forEach(element=>observer.observe(element));return()=>observer.disconnect();
  },[messages,me,friend.id,visibilityVersion]);
  async function toggle(){setBusy(true);setError('');try{await api('/api/community','POST',{action:'disappearing',conversation:friend.id,enabled:!friend.disappearing});await onChanged();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
- return <div className="chat-privacy-bar"><label><Timer size={16}/><span>Disappearing messages<small>Your outgoing messages vanish after they’re read and the receiver leaves.</small></span><button className="chat-privacy-toggle" role="switch" aria-checked={!!friend.disappearing} aria-label="Disappearing messages for messages you send" disabled={busy} onClick={()=>void toggle()}><i/></button></label>{error&&<p role="alert">{error}</p>}</div>;
+ return <div className={`chat-privacy-bar ${friend.disappearing?'is-enabled':''}`}><span className="chat-privacy-icon" aria-hidden="true"><Timer size={19}/></span><div className="chat-privacy-copy"><b>Disappearing messages</b><small id={descriptionId}>{friend.disappearing?'New messages you send vanish after they’re read and your Yaaro leaves.':'Turn on to clear new messages after they’re read and your Yaaro leaves.'}</small></div><div className="chat-privacy-control"><span className="chat-privacy-state" role="status">{busy?'Saving…':friend.disappearing?'On':'Off'}</span><button type="button" className="chat-privacy-toggle" role="switch" aria-checked={!!friend.disappearing} aria-label="Disappearing messages for messages you send" aria-describedby={descriptionId} disabled={busy} onClick={()=>void toggle()}><span className="chat-switch-track" aria-hidden="true"><i/></span></button></div>{error&&<p className="chat-privacy-error" role="alert">{error}</p>}</div>;
 }
 export function OneViewChatMedia({message,own,onClosed}:{message:ChatMessage;own:boolean;onClosed:()=>Promise<void>}){
  const [opening,setOpening]=useState(false),[url,setUrl]=useState(''),[error,setError]=useState('');const token=useRef(0),objectUrl=useRef(''),claimed=useRef(false),locked=useRef(false);
