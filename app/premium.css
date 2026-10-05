@@ -167,3 +167,5 @@ html[data-theme=dark] .yaaro-social .chat-switch-track{background:#455873;box-sh
 html[data-theme=dark] .chat-privacy-error{color:#ffa6b3}
 @media(max-width:720px){.yaaro-social .chat-privacy-bar,html[data-theme=dark] .yaaro-social .chat-privacy-bar{padding:11px 12px;gap:9px}}
 @media(max-width:360px){.yaaro-social .chat-privacy-bar,html[data-theme=dark] .yaaro-social .chat-privacy-bar{grid-template-columns:minmax(0,1fr) 52px}.chat-privacy-icon{display:none}}
+.pending-retry{display:inline-flex;align-items:center;min-height:36px;font-size:.75rem;font-weight:700;color:#1769e0;text-decoration:underline;padding:6px 0}
+html[data-theme=dark] .pending-retry{color:#91c3ff}
