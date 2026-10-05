@@ -4,7 +4,7 @@ This edition keeps YAARO's design, animations, demo, D1-backed connections/messa
 
 ## Source and hosting
 
-Create an empty private `YAARO` repository in `haritre07-edutantr` and initialize it with a README so there is a main branch. Grant the connected GitHub app access to that repository. All source can then be uploaded in a single commit. Keep secrets out of GitHub.
+Source is published in `haritre07-edutantr/yaaro` on `main`. The configured Worker is `autumn-lake-80feyaaro` and its public origin is `https://autumn-lake-80feyaaro.haritre07.workers.dev`. D1 is named `yaaro`; the private R2 bucket is `yaaro-profile-photos`. These configuration values identify resources; they do not prove a successful deployment. Keep secrets out of GitHub.
 
 Use a Cloudflare account you control. Choose its free Workers plan; do not enable a paid plan automatically. R2 account activation may require billing details; complete that yourself and review charges/limits. Nothing here purchases a plan or creates paid resources.
 
@@ -14,7 +14,7 @@ Authenticate the official Wrangler CLI, create a D1 database named `yaaro` and a
 
 Set `SUPABASE_PUBLISHABLE_KEY` to the modern publishable key for project `zpxfagfrkqbnwgdbygep`. This is intentionally public; never use service_role, sb_secret, a database password or a Supabase management token. Set `PUBLIC_APP_ORIGIN` to the exact new HTTPS origin with no trailing slash. Set any TURN secret via Wrangler secrets, never in config. Run `pnpm deploy` only after these steps. The preflight rejects placeholder configuration.
 
-Cloudflare's Git integration can build with `pnpm install --frozen-lockfile && pnpm build` and deploy the generated configuration in `dist/server/wrangler.json`. Keep source binding configuration synchronized with account resources. Consult current Cloudflare documentation before enabling a build pipeline. The current ChatGPT Sites deployment is untouched, and its D1/R2 data is not copied by this source export. New hosting starts with a new database; migration of real member identities/content requires a separate verified process.
+In the existing Worker's Settings > Builds, connect this repository on `main`, with root directory `/`, build command `pnpm install --frozen-lockfile && pnpm build`, and deploy command `pnpm db:migrate:remote && pnpm deploy`. The build creates the generated configuration in `dist/server/wrangler.json`. The build token must permit the configured D1 migrations and Worker deployment; never paste it in chat or commit it. A push after connection should trigger a new build. Inspect the build log and verify a successful active deployment before treating the public site as live. Keep source binding configuration synchronized with account resources. Consult current Cloudflare documentation before enabling a build pipeline. The current ChatGPT Sites deployment is untouched, and its D1/R2 data is not copied by this source export. New hosting starts with a new database; migration of real member identities/content requires a separate verified process.
 
 ## Supabase login configuration
 
