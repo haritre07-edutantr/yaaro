@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./social.css";
 import "./theme.css";
+import "./premium.css";
 import {ThemeProvider} from "@/components/theme";
 import CallProvider from '@/components/call-provider';
 import { MotionProvider } from "@/components/motion";
