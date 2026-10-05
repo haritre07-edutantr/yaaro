@@ -4,6 +4,7 @@ import "./social.css";
 import "./theme.css";
 import "./premium.css";
 import {ThemeProvider} from "@/components/theme";
+import {SoundProvider} from "@/components/sounds";
 import CallProvider from '@/components/call-provider';
 import { MotionProvider } from "@/components/motion";
 
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased"><ThemeProvider><MotionProvider><CallProvider>{children}</CallProvider></MotionProvider></ThemeProvider></body>
+      <body className="antialiased"><ThemeProvider><MotionProvider><SoundProvider><CallProvider>{children}</CallProvider></SoundProvider></MotionProvider></ThemeProvider></body>
     </html>
   );
 }

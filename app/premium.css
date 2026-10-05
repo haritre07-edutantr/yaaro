@@ -169,3 +169,14 @@ html[data-theme=dark] .chat-privacy-error{color:#ffa6b3}
 @media(max-width:360px){.yaaro-social .chat-privacy-bar,html[data-theme=dark] .yaaro-social .chat-privacy-bar{grid-template-columns:minmax(0,1fr) 52px}.chat-privacy-icon{display:none}}
 .pending-retry{display:inline-flex;align-items:center;min-height:36px;font-size:.75rem;font-weight:700;color:#1769e0;text-decoration:underline;padding:6px 0}
 html[data-theme=dark] .pending-retry{color:#91c3ff}
+.sound-preferences{padding:18px 0;border-block:1px solid var(--surface-border)}
+.sound-preferences h3{display:flex;align-items:center;gap:8px;font-size:.95rem;color:var(--text-primary);margin-bottom:12px}
+.sound-setting{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:48px;font-size:.8rem;color:var(--text-primary)}
+.sound-setting>button{display:flex;align-items:center;gap:8px;padding:8px 0;min-height:44px}
+.sound-setting>button>span{width:40px;height:24px;padding:3px;border-radius:20px;background:#8598b1;display:block}
+.sound-setting>button>span>i{display:block;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+.sound-setting>button[aria-checked=true]>span{background:linear-gradient(135deg,#1769e0,#0aa99f)}
+.sound-setting>button[aria-checked=true]>span>i{transform:translateX(16px)}
+.sound-setting small{width:22px;font-size:.67rem;color:var(--text-secondary)}
+.sound-preferences>p{font-size:.7rem;line-height:1.6;color:var(--text-secondary);margin-top:10px}
+.sound-preferences>.text-link{min-height:40px;font-size:.77rem}

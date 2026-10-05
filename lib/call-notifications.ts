@@ -5,9 +5,9 @@ export async function enableCallNotifications(){
  await navigator.serviceWorker.register('/call-notifications-sw.js',{scope:'/'});
  await navigator.serviceWorker.ready;return true;
 }
-export async function showCallNotification(id:string,name:string,mode:'voice'|'video'){
+export async function showCallNotification(id:string,name:string,mode:'voice'|'video',silent=false){
  if(!('Notification' in window)||Notification.permission!=='granted'||!('serviceWorker' in navigator))return;
  const registration=await navigator.serviceWorker.getRegistration('/');if(!registration?.active)return;
- await registration.showNotification(`Incoming ${mode} call`,{body:`${name} is calling on YAARO. Tap to return and answer.`,tag:`yaaro-call-${id}`,icon:'/favicon.svg'});
+ await registration.showNotification(`Incoming ${mode} call`,{body:`${name} is calling on YAARO. Tap to return and answer.`,tag:`yaaro-call-${id}`,icon:'/favicon.svg',silent});
  return async()=>{for(const notification of await registration.getNotifications({tag:`yaaro-call-${id}`}))notification.close();};
 }
