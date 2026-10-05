@@ -11,6 +11,11 @@ const partial=new Peer();const pending=gatherRelaySdp(partial,options);partial.l
 assert.equal(await pending,relay,'A valid relay survives another URL that never finishes gathering');assert.equal(partial.listeners,0);
 const complete=new Peer();complete.iceGatheringState='complete';complete.localDescription.sdp=relay;
 assert.equal(await gatherRelaySdp(complete,options),relay);assert.equal(complete.listeners,0);
+const repeated=new Peer();repeated.localDescription.sdp=relay;
+const bounded=gatherRelaySdp(repeated,{timeoutMs:1000,settleMs:20});
+const events=setInterval(()=>repeated.emit('icecandidate'),2);
+try{await Promise.race([bounded,new Promise((_,reject)=>setTimeout(()=>reject(new Error('New candidates indefinitely postponed signalling')),200))]);}finally{clearInterval(events);}
+assert.equal(repeated.listeners,0,'More candidates do not restart the relay signalling wait');
 const noRelay=new Peer();noRelay.localDescription.sdp='v=0\r\na=candidate:1 1 udp 1 192.0.2.1 1234 typ host\r\n';
 await assert.rejects(gatherRelaySdp(noRelay,{timeoutMs:5,settleMs:1}),/No private relay/);assert.equal(noRelay.listeners,0);
 const closed=new Peer();const cancelled=gatherRelaySdp(closed,options);closed.connectionState='closed';closed.emit('connectionstatechange');await assert.rejects(cancelled,/Call cancelled/);assert.equal(closed.listeners,0);
