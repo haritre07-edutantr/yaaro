@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./social.css";
 import CallProvider from '@/components/call-provider';
 import { MotionProvider } from "@/components/motion";
 
