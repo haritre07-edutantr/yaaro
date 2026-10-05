@@ -10,8 +10,8 @@ export type CommunityProfile=z.infer<typeof profileSchema>;
 export type Privacy=z.infer<typeof privacySchema>;
 export type Member={id:string;name:string;age:number;languages:string[];interests:string[];bio:string;vibe:string;avatar:CommunityProfile['avatar'];region:string;online:boolean;photoUrl?:string};
 export type Self=Member&{dob:string;privacy:Privacy;published:boolean;status:string};
-export type Friendship={id:string;status:string;requester:string;updatedAt:number;person:Member;pinned?:boolean;favorite?:boolean;unreadCount?:number;lastMessage?:{body:string;createdAt:number;own:boolean;deleted:boolean}};
-export type ChatMessage={id:string;author:string;body:string;replyId:string|null;deleted:number;createdAt:number;attachment?:{id:string;kind:'photo'|'voice'};reactions:{emoji:string;count:number;mine:boolean}[];read:boolean};
+export type Friendship={id:string;status:string;requester:string;updatedAt:number;person:Member;pinned?:boolean;favorite?:boolean;disappearing?:boolean;unreadCount?:number;lastMessage?:{body:string;createdAt:number;own:boolean;deleted:boolean}};
+export type ChatMessage={id:string;author:string;body:string;replyId:string|null;deleted:number;createdAt:number;attachment?:{id:string;kind:'photo'|'voice'|'video'};reactions:{emoji:string;count:number;mine:boolean}[];read:boolean;disappearing:boolean;opened?:boolean};
 export type Snapshot={me:Self|null;people:Member[];connections:Friendship[];blocked:Member[];hasMore:boolean};
 export const actionSchema=z.discriminatedUnion('action',[
  z.object({action:z.literal('chatPreference'),target:z.string().uuid(),kind:z.enum(['pin','favorite']),enabled:z.boolean()}),
@@ -22,7 +22,9 @@ export const actionSchema=z.discriminatedUnion('action',[
  z.object({action:z.literal('message'),conversation:z.string().max(100),body:z.string().trim().min(1).max(2000),replyId:z.string().uuid().optional(),clientId:z.string().uuid()}),
  z.object({action:z.literal('delete'),id:z.string().uuid()}),
  z.object({action:z.literal('reaction'),id:z.string().uuid(),emoji:z.enum(['💙','😂','🎉','👍'])}),
- z.object({action:z.literal('read'),conversation:z.string().max(100)}),
+ z.object({action:z.literal('read'),conversation:z.string().max(100),ids:z.array(z.string().uuid()).max(30).optional()}),
+ z.object({action:z.literal('leaveChat'),conversation:z.string().max(100),ids:z.array(z.string().uuid()).max(30).optional()}),
+ z.object({action:z.literal('disappearing'),conversation:z.string().max(100),enabled:z.boolean()}),
  z.object({action:z.literal('block'),target:z.string().uuid()}),
  z.object({action:z.literal('unblock'),target:z.string().uuid()}),
  z.object({action:z.literal('report'),target:z.string().uuid(),category:z.enum(['Harassment','Spam','Scam/Fraud','Sexual Content','Threats','Fake Profile','Impersonation','Underage Safety Concern','Other']),description:z.string().max(2000)}),

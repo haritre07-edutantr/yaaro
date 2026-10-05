@@ -1,0 +1,35 @@
+'use client';
+import {useEffect,useRef,useState} from 'react';
+import {Eye,Image,Video,Timer,Lock} from 'lucide-react';
+import {Modal} from './ui';
+import {api} from '@/lib/services';
+import type {ChatMessage,Friendship} from '@/lib/community-model';
+export function ChatPrivacy({friend,messages,me,onChanged}:{friend:Friendship;messages:ChatMessage[];me:string;onChanged:()=>Promise<void>}){
+ const [busy,setBusy]=useState(false),[error,setError]=useState(''),[visibilityVersion,setVisibilityVersion]=useState(0);const seen=useRef(new Set<string>()),pending=useRef(new Set<string>()),chain=useRef(Promise.resolve()),alive=useRef(true),visible=useRef(true);
+ const send=(action:string,ids:string[]=[])=>fetch('/api/community',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,conversation:friend.id,ids}),keepalive:true}).then(response=>{if(!response.ok)throw new Error('Chat privacy update could not be saved.');});
+ const read=(ids:string[])=>{ids.forEach(id=>pending.current.add(id));chain.current=chain.current.catch(()=>{}).then(async()=>{if(!alive.current||!visible.current)return;await send('read',ids);ids.forEach(id=>pending.current.delete(id));}).catch(()=>{});};
+ useEffect(()=>{
+  alive.current=true;visible.current=!document.hidden;if(visible.current)read([]);
+  const leave=()=>{visible.current=false;const ids=Array.from(pending.current).slice(-30);void send('leaveChat',ids).catch(()=>{});};
+  const visibility=()=>{if(document.hidden)leave();else{visible.current=true;seen.current.clear();setVisibilityVersion(value=>value+1);read([]);}};
+  document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',leave);
+  const timer=setInterval(()=>{if(visible.current)read(Array.from(pending.current).slice(-30));},10000);
+  return()=>{alive.current=false;clearInterval(timer);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pagehide',leave);const ids=Array.from(pending.current).slice(-30);void chain.current.catch(()=>{}).then(()=>send('leaveChat',ids)).catch(()=>{});};
+ },[friend.id]);
+ useEffect(()=>{
+  const ids=new Set(messages.filter(m=>m.author!==me&&!m.deleted&&!m.attachment).map(m=>m.id));seen.current=new Set([...seen.current].filter(id=>ids.has(id)));
+  const root=document.querySelector('.chat-thread .messages');if(!root||!window.IntersectionObserver)return;
+  const observer=new IntersectionObserver(entries=>{const readIds:string[]=[];for(const entry of entries){const id=(entry.target as HTMLElement).dataset.messageId;if(entry.isIntersecting&&visible.current&&id&&ids.has(id)&&!seen.current.has(id)){seen.current.add(id);readIds.push(id);}}if(readIds.length)read(readIds.slice(-30));},{root,threshold:.1});
+  root.querySelectorAll('[data-message-id]').forEach(element=>observer.observe(element));return()=>observer.disconnect();
+ },[messages,me,friend.id,visibilityVersion]);
+ async function toggle(){setBusy(true);setError('');try{await api('/api/community','POST',{action:'disappearing',conversation:friend.id,enabled:!friend.disappearing});await onChanged();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+ return <div className="chat-privacy-bar"><label><Timer size={16}/><span>Disappearing messages<small>Your outgoing messages vanish after they’re read and the receiver leaves.</small></span><button className="chat-privacy-toggle" role="switch" aria-checked={!!friend.disappearing} aria-label="Disappearing messages for messages you send" disabled={busy} onClick={()=>void toggle()}><i/></button></label>{error&&<p role="alert">{error}</p>}</div>;
+}
+export function OneViewChatMedia({message,own,onClosed}:{message:ChatMessage;own:boolean;onClosed:()=>Promise<void>}){
+ const [opening,setOpening]=useState(false),[url,setUrl]=useState(''),[error,setError]=useState('');const token=useRef(0),objectUrl=useRef(''),claimed=useRef(false),locked=useRef(false);
+ function close(){token.current++;if(objectUrl.current)URL.revokeObjectURL(objectUrl.current);objectUrl.current='';setUrl('');setOpening(false);if(claimed.current){claimed.current=false;void fetch('/api/chat-media',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'close',id:message.id}),keepalive:true}).then(()=>onClosed()).catch(()=>{});}}
+ useEffect(()=>{const hide=()=>{if(document.hidden)close();};const blur=()=>{if(objectUrl.current)close();};document.addEventListener('visibilitychange',hide);window.addEventListener('pagehide',close);window.addEventListener('blur',blur);return()=>{document.removeEventListener('visibilitychange',hide);window.removeEventListener('pagehide',close);window.removeEventListener('blur',blur);close();};},[message.id]);
+ useEffect(()=>{if(!url)return;const timeout=setTimeout(close,10000);return()=>clearTimeout(timeout);},[url]);
+ async function open(){if(locked.current||own||message.opened)return;locked.current=true;setOpening(true);setError('');const current=++token.current;try{const response=await fetch('/api/chat-media',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'open',id:message.id}),cache:'no-store'});if(!response.ok){const data=await response.json() as {error?:string};throw new Error(data.error||'This attachment is unavailable.');}claimed.current=true;if(current!==token.current){close();return;}const blob=await response.blob();if(current!==token.current){close();return;}const next=URL.createObjectURL(blob);objectUrl.current=next;setUrl(next);}catch(e){if(current===token.current)setError((e as Error).message);if(claimed.current)close();else locked.current=false;}finally{if(current===token.current)setOpening(false);}}
+ return <><button className="chat-one-view" disabled={own||opening||!!message.opened} onClick={()=>void open()}>{message.attachment?.kind==='video'?<Video size={22}/>:<Image size={22}/>}<span><b>{opening?'Opening…':message.opened?'Opened':own?'Sent · View once':message.attachment?.kind==='video'?'View video once':'View photo once'}</b><small>{own?'Disappears when your Yaaro closes it':'One opening. No replay.'}</small></span><Eye size={17}/></button>{error&&<p className="small-note" role="alert">{error}</p>}{url&&<Modal title="View once" onClose={close}><div className="chat-once-viewer" onContextMenu={event=>event.preventDefault()}><p><Lock size={15}/> Closes after one viewing. Leaving this window removes it.</p>{message.attachment?.kind==='video'?<video src={url} autoPlay playsInline controls={false} disablePictureInPicture controlsList="nodownload noremoteplayback" onEnded={close} onTimeUpdate={event=>{if(event.currentTarget.currentTime>=10)close();}} onClick={event=>{if(event.currentTarget.paused)void event.currentTarget.play().catch(()=>{});}} onError={close} aria-label="One-view chat video"/>:<img src={url} draggable={false} alt="One-view shared photo" onError={close}/>}<p className="small-note">Screenshots and screen recording cannot be blocked or detected in a browser.</p></div></Modal>}</>;
+}

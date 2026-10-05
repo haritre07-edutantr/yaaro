@@ -21,16 +21,16 @@ export class CommunityService{
  async snapshot(filters:{q?:string;vibe?:string;language?:string;interest?:string;offset?:number}={}):Promise<Snapshot>{
   const me=await this.member();if(!me)return {me:null,people:[],connections:[],blocked:[],hasMore:false};
   const relationships=await this.stmt(`SELECT f.id AS connection_id, f.status AS connection_status, f.requester, f.updated_at, m.*,
-   COALESCE(cp.pinned,0) AS chat_pinned, COALESCE(cp.favorite,0) AS chat_favorite,
+   COALESCE(cp.pinned,0) AS chat_pinned, COALESCE(cp.favorite,0) AS chat_favorite, COALESCE(cp.disappearing,0) AS chat_disappearing,
    lm.id AS last_id, lm.body AS last_body, lm.deleted AS last_deleted, lm.author AS last_author, lm.created_at AS last_created,
-   (SELECT COUNT(*) FROM chat_messages cm WHERE cm.conversation=f.id AND cm.author!=? AND cm.deleted=0 AND cm.created_at>CASE WHEN f.member_a=? THEN f.read_a ELSE f.read_b END) AS unread_count
+   (SELECT COUNT(*) FROM chat_messages cm WHERE cm.conversation=f.id AND cm.author!=? AND cm.deleted=0 AND cm.receiver_read_at IS NULL AND ? IS NOT NULL) AS unread_count
    FROM friendships f JOIN members m ON m.id=CASE WHEN f.member_a=? THEN f.member_b ELSE f.member_a END
    LEFT JOIN chat_preferences cp ON cp.member=? AND cp.target=m.id
    LEFT JOIN chat_messages lm ON f.status='accepted' AND lm.id=(SELECT id FROM chat_messages WHERE conversation=f.id ORDER BY created_at DESC,id DESC LIMIT 1)
    WHERE (f.member_a=? OR f.member_b=?) AND f.status IN ('accepted','pending') AND m.status='active'
    AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker=? AND b.blocked=m.id) OR (b.blocker=m.id AND b.blocked=?))
-   ORDER BY f.updated_at DESC LIMIT 100`,me.id,me.id,me.id,me.id,me.id,me.id,me.id,me.id).all<Row&{connection_id:string;connection_status:string;requester:string;updated_at:number;chat_pinned:number;chat_favorite:number;last_id:string|null;last_body:string;last_deleted:number;last_author:string;last_created:number;unread_count:number}>();
-  const connections=relationships.results.map(r=>({id:r.connection_id,status:r.connection_status,requester:r.requester,updatedAt:r.updated_at,person:this.public(r,r.connection_status==='accepted'),pinned:r.connection_status==='accepted'&&!!r.chat_pinned,favorite:r.connection_status==='accepted'&&!!r.chat_favorite,unreadCount:r.connection_status==='accepted'?r.unread_count:0,lastMessage:r.connection_status==='accepted'&&r.last_id?{body:r.last_deleted?'':r.last_body,createdAt:r.last_created,own:r.last_author===me.id,deleted:!!r.last_deleted}:undefined}));
+   ORDER BY f.updated_at DESC LIMIT 100`,me.id,me.id,me.id,me.id,me.id,me.id,me.id,me.id).all<Row&{connection_id:string;connection_status:string;requester:string;updated_at:number;chat_pinned:number;chat_favorite:number;chat_disappearing:number;last_id:string|null;last_body:string;last_deleted:number;last_author:string;last_created:number;unread_count:number}>();
+  const connections=relationships.results.map(r=>({id:r.connection_id,status:r.connection_status,requester:r.requester,updatedAt:r.updated_at,person:this.public(r,r.connection_status==='accepted'),pinned:r.connection_status==='accepted'&&!!r.chat_pinned,disappearing:!!r.chat_disappearing,favorite:r.connection_status==='accepted'&&!!r.chat_favorite,unreadCount:r.connection_status==='accepted'?r.unread_count:0,lastMessage:r.connection_status==='accepted'&&r.last_id?{body:r.last_deleted?'':r.last_body,createdAt:r.last_created,own:r.last_author===me.id,deleted:!!r.last_deleted}:undefined}));
   const exclusions='NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker = ? AND b.blocked = m.id) OR (b.blocker = m.id AND b.blocked = ?))';
   const visible="(json_extract(m.privacy, '$.discover') = 'Everyone' OR (json_extract(m.privacy, '$.discover') = 'Connections only' AND EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted' AND ((f.member_a = m.id AND f.member_b = ?) OR (f.member_b = m.id AND f.member_a = ?)))))";
   const terms=['m.published = 1',"m.status = 'active'",'m.id != ?',exclusions,visible];const params:any[]=[me.id,me.id,me.id,me.id,me.id];
@@ -40,7 +40,13 @@ export class CommunityService{
   const blocks=await this.stmt('SELECT m.* FROM members m JOIN member_blocks b ON b.blocked = m.id WHERE b.blocker = ? LIMIT 100',me.id).all<Row>();
   return {me:{...this.public(me,true),dob:me.dob,privacy:{...defaults,...JSON.parse(me.privacy)},published:!!me.published,status:me.status},people:rows.results.slice(0,24).map(p=>this.public(p,connections.some(c=>c.status==='accepted'&&c.person.id===p.id))),connections,blocked:blocks.results.map(p=>this.public(p)),hasMore:rows.results.length>24};
  }
- async messages(id:string,before?:number):Promise<ChatMessage[]>{const me=await this.requireMember();const {c}=await this.readable(id,me);const rows=await this.stmt('SELECT m.id, m.author, m.body, m.reply_id, m.deleted, m.created_at, cm.kind AS media_kind FROM chat_messages m LEFT JOIN chat_media cm ON cm.message=m.id WHERE m.conversation = ? AND m.created_at < ? ORDER BY m.created_at DESC, m.id DESC LIMIT 50',id,before||Date.now()+1).all<any>();const ids=rows.results.map(m=>m.id);const allReactions=ids.length?await this.stmt(`SELECT message, emoji, COUNT(*) AS count, MAX(CASE WHEN member = ? THEN 1 ELSE 0 END) AS mine FROM chat_reactions WHERE message IN (${ids.map(()=>'?').join(',')}) GROUP BY message, emoji`,me.id,...ids).all<any>():{results:[]};const result=rows.results.reverse().map(m=>({id:m.id,author:m.author,body:m.deleted?'':m.body,attachment:!m.deleted&&m.media_kind?{id:m.id,kind:m.media_kind}:undefined,replyId:m.reply_id,deleted:m.deleted,createdAt:m.created_at,reactions:allReactions.results.filter(r=>r.message===m.id).map(r=>({emoji:r.emoji,count:r.count,mine:!!r.mine})),read:m.author===me.id&&(c.member_a===me.id?c.read_b:c.read_a)>=m.created_at}));return result;}
+ async cleanupChat(id:string){
+  await this.stmt(`DELETE FROM chat_messages WHERE conversation=? AND (
+   id IN (SELECT message FROM chat_media_views WHERE opened_at<?)
+   OR (disappearing=1 AND receiver_read_at IS NOT NULL AND NOT EXISTS(SELECT 1 FROM chat_presence p JOIN friendships f ON f.id=p.conversation WHERE p.conversation=chat_messages.conversation AND p.member=CASE WHEN f.member_a=chat_messages.author THEN f.member_b ELSE f.member_a END AND p.touched_at>?))
+  )`,id,Date.now()-30000,Date.now()-30000).run();
+ }
+ async messages(id:string,before?:number):Promise<ChatMessage[]>{const me=await this.requireMember();await this.readable(id,me);await this.cleanupChat(id);const rows=await this.stmt('SELECT m.id, m.author, m.body, m.reply_id, m.deleted, m.created_at, m.disappearing,m.receiver_read_at, EXISTS(SELECT 1 FROM chat_media_views v WHERE v.message=m.id) AS media_opened, cm.kind AS media_kind FROM chat_messages m LEFT JOIN chat_media cm ON cm.message=m.id WHERE m.conversation = ? AND m.created_at < ? ORDER BY m.created_at DESC, m.rowid DESC LIMIT 30',id,before||Date.now()+1).all<any>();const ids=rows.results.map(m=>m.id);const allReactions=ids.length?await this.stmt(`SELECT message, emoji, COUNT(*) AS count, MAX(CASE WHEN member = ? THEN 1 ELSE 0 END) AS mine FROM chat_reactions WHERE message IN (${ids.map(()=>'?').join(',')}) GROUP BY message, emoji`,me.id,...ids).all<any>():{results:[]};const result=rows.results.reverse().map(m=>({id:m.id,author:m.author,body:m.deleted?'':m.body,attachment:!m.deleted&&m.media_kind?{id:m.id,kind:m.media_kind}:undefined,replyId:m.reply_id,deleted:m.deleted,createdAt:m.created_at,reactions:allReactions.results.filter(r=>r.message===m.id).map(r=>({emoji:r.emoji,count:r.count,mine:!!r.mine})),read:!!m.receiver_read_at,disappearing:!!m.disappearing,opened:!!m.media_opened}));return result;}
  async act(action:Action){
   if(action.action==='profile'){adultAge(action.profile.dob);const existing=await this.member();const p=action.profile;const now=Date.now();await this.stmt('INSERT INTO members (id, owner, name, dob, languages, interests, bio, vibe, avatar, region, privacy, published, status, created_at, last_seen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(owner) DO UPDATE SET name = excluded.name, dob = excluded.dob, languages = excluded.languages, interests = excluded.interests, bio = excluded.bio, vibe = excluded.vibe, avatar = excluded.avatar, region = excluded.region',existing?.id||crypto.randomUUID(),this.owner,p.name,p.dob,JSON.stringify([...new Set(p.languages)]),JSON.stringify([...new Set(p.interests)]),p.bio,p.vibe,p.avatar,p.region,JSON.stringify(defaults),1,'active',now,now).run();return {saved:true};}
   const me=await this.requireMember();const now=Date.now();
@@ -57,7 +63,7 @@ export class CommunityService{
      OR EXISTS (SELECT 1 FROM chat_preferences WHERE member=? AND target=? AND ${column}=1))
      ON CONFLICT(member,target) DO UPDATE SET ${column}=excluded.${column},updated_at=excluded.updated_at`,me.id,action.target,column==='pinned'?1:0,column==='favorite'?1:0,now,this.pair(me.id,action.target),me.id,action.target,action.target,me.id,action.target,me.id,limit,me.id,action.target).run();
     if(!result.meta.changes){await this.readable(this.pair(me.id,action.target),me);throw new Error(action.kind==='pin'?'PIN_LIMIT':'FAVORITE_LIMIT');}
-   }else{await this.stmt(`UPDATE chat_preferences SET ${column}=0,updated_at=? WHERE member=? AND target=?`,now,me.id,action.target).run();await this.stmt('DELETE FROM chat_preferences WHERE member=? AND target=? AND pinned=0 AND favorite=0',me.id,action.target).run();}
+   }else{await this.stmt(`UPDATE chat_preferences SET ${column}=0,updated_at=? WHERE member=? AND target=?`,now,me.id,action.target).run();await this.stmt('DELETE FROM chat_preferences WHERE member=? AND target=? AND pinned=0 AND favorite=0 AND disappearing=0',me.id,action.target).run();}
    return {saved:true};
   }
   if(action.action==='privacy'){await this.stmt('UPDATE members SET privacy = ?, published = ? WHERE id = ?',JSON.stringify(action.privacy),action.published?1:0,me.id).run();return {saved:true};}
@@ -75,7 +81,26 @@ export class CommunityService{
    // INSERT SELECT rechecks mutual connection, restrictions and blocks in the same statement as the write.
    const r=await this.stmt("INSERT INTO chat_messages (id, conversation, author, body, reply_id, deleted, created_at) SELECT ?, ?, ?, ?, ?, 0, ? WHERE EXISTS (SELECT 1 FROM friendships f WHERE f.id = ? AND f.status = 'accepted' AND (f.member_a = ? OR f.member_b = ?)) AND EXISTS (SELECT 1 FROM members m WHERE m.id = ? AND m.status = 'active' AND json_extract(m.privacy, '$.messages') != 'Nobody') AND EXISTS (SELECT 1 FROM members m WHERE m.id = ? AND m.status = 'active') AND NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker = ? AND b.blocked = ?) OR (b.blocker = ? AND b.blocked = ?))",action.clientId,action.conversation,me.id,action.body,action.replyId||null,now,action.conversation,me.id,me.id,peer.id,me.id,me.id,peer.id,peer.id,me.id).run();if(!r.meta.changes)throw new Error('FORBIDDEN');return {saved:true};
   }
-  if(action.action==='read'){await this.readable(action.conversation,me);await this.stmt('UPDATE friendships SET read_a = CASE WHEN member_a = ? THEN ? ELSE read_a END, read_b = CASE WHEN member_b = ? THEN ? ELSE read_b END WHERE id = ?',me.id,now,me.id,now,action.conversation).run();return {saved:true};}
+  if(action.action==='disappearing'){
+   const {peer}=await this.readable(action.conversation,me);
+   await this.stmt('INSERT INTO chat_preferences(member,target,pinned,favorite,disappearing,updated_at) VALUES(?,?,0,0,?,?) ON CONFLICT(member,target) DO UPDATE SET disappearing=excluded.disappearing,updated_at=excluded.updated_at',me.id,peer.id,action.enabled?1:0,now).run();return {saved:true};
+  }
+  if(action.action==='read'){
+   await this.readable(action.conversation,me);const ids=action.ids;
+   const where=ids?(ids.length?` AND id IN (${ids.map(()=>'?').join(',')})`:' AND 0'):'';
+   await this.db.batch([
+    this.stmt('INSERT INTO chat_presence(member,conversation,touched_at) VALUES(?,?,?) ON CONFLICT(member,conversation) DO UPDATE SET touched_at=excluded.touched_at',me.id,action.conversation,now),
+    this.stmt('UPDATE chat_messages SET receiver_read_at=COALESCE(receiver_read_at,?) WHERE conversation=? AND author!=?'+where,now,action.conversation,me.id,...(ids||[])),
+    this.stmt('UPDATE friendships SET read_a=CASE WHEN member_a=? THEN ? ELSE read_a END,read_b=CASE WHEN member_b=? THEN ? ELSE read_b END WHERE id=?',me.id,now,me.id,now,action.conversation)
+   ]);return {saved:true};
+  }
+  if(action.action==='leaveChat'){
+   await this.readable(action.conversation,me);await this.db.batch([
+    this.stmt('UPDATE chat_messages SET receiver_read_at=COALESCE(receiver_read_at,?) WHERE conversation=? AND author!=? AND id IN ('+(action.ids?.length?action.ids.map(()=>'?').join(','):'NULL')+')',now,action.conversation,me.id,...(action.ids||[])),
+    this.stmt('DELETE FROM chat_presence WHERE member=? AND conversation=?',me.id,action.conversation),
+    this.stmt('DELETE FROM chat_messages WHERE conversation=? AND author!=? AND disappearing=1 AND receiver_read_at IS NOT NULL',action.conversation,me.id)
+   ]);return {saved:true};
+  }
   if(action.action==='delete'||action.action==='reaction'){
    const m=await this.stmt('SELECT * FROM chat_messages WHERE id = ?',action.id).first<any>();if(!m)throw new Error('NOT_FOUND');await this.readable(m.conversation,me);
    if(action.action==='delete'){if(m.author!==me.id)throw new Error('FORBIDDEN');await this.db.batch([this.stmt("UPDATE chat_messages SET body = '', deleted = 1 WHERE id = ? AND author = ?",m.id,me.id),this.stmt('DELETE FROM chat_reactions WHERE message = ?',m.id)]);}
