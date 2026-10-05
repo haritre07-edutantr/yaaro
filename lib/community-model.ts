@@ -11,7 +11,7 @@ export type Privacy=z.infer<typeof privacySchema>;
 export type Member={id:string;name:string;age:number;languages:string[];interests:string[];bio:string;vibe:string;avatar:CommunityProfile['avatar'];region:string;online:boolean;photoUrl?:string};
 export type Self=Member&{dob:string;privacy:Privacy;published:boolean;status:string};
 export type Friendship={id:string;status:string;requester:string;updatedAt:number;person:Member;pinned?:boolean;favorite?:boolean;unreadCount?:number;lastMessage?:{body:string;createdAt:number;own:boolean;deleted:boolean}};
-export type ChatMessage={id:string;author:string;body:string;replyId:string|null;deleted:number;createdAt:number;reactions:{emoji:string;count:number;mine:boolean}[];read:boolean};
+export type ChatMessage={id:string;author:string;body:string;replyId:string|null;deleted:number;createdAt:number;attachment?:{id:string;kind:'photo'|'voice'};reactions:{emoji:string;count:number;mine:boolean}[];read:boolean};
 export type Snapshot={me:Self|null;people:Member[];connections:Friendship[];blocked:Member[];hasMore:boolean};
 export const actionSchema=z.discriminatedUnion('action',[
  z.object({action:z.literal('chatPreference'),target:z.string().uuid(),kind:z.enum(['pin','favorite']),enabled:z.boolean()}),

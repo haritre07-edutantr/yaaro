@@ -3,7 +3,7 @@ import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import ts from 'typescript';
 const dir=new URL('../.sites-runtime/media-tests/',import.meta.url);mkdirSync(dir,{recursive:true});
 writeFileSync(new URL('media.mjs',dir),ts.transpileModule(readFileSync(new URL('../lib/call-media.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText);
-const {addRemoteTrack,playRemoteMedia}=await import(new URL('media.mjs',dir));
+const {addRemoteTrack,playRemoteMedia,attachLocalMedia}=await import(new URL('media.mjs',dir));
 const tracks=[];
 const stream={getTracks:()=>tracks,getVideoTracks:()=>tracks.filter(t=>t.kind==='video'),getAudioTracks:()=>tracks.filter(t=>t.kind==='audio'),addTrack:t=>tracks.push(t)};
 addRemoteTrack(stream,{id:'audio',kind:'audio'});
@@ -24,4 +24,6 @@ assert.equal(await playRemoteMedia(video,audio,stream,true),false,'A user gestur
 const empty={getAudioTracks:()=>[],getVideoTracks:()=>[]};
 await playRemoteMedia(video,audio,empty,true);
 assert.equal(videoPlays,3);assert.equal(audioPlays,2,'Empty streams must not show misleading autoplay errors');
+let localPlays=0;const lateLocal={srcObject:null,muted:false,play:async()=>{localPlays++;}};attachLocalMedia(null,stream);attachLocalMedia(lateLocal,stream);assert.equal(lateLocal.srcObject,stream,'A preview mounted after capture still binds its media');assert.equal(lateLocal.muted,true);assert.equal(localPlays,1);
+await playRemoteMedia(null,null,stream,true);const lateRemote={srcObject:null,muted:false,play:async()=>{}};await playRemoteMedia(lateRemote,null,stream,true);assert.equal(lateRemote.srcObject,stream,'Remote video binds even if its first track arrived before the element mounted');
 console.log('Remote track aggregation, independent video playback and audio permission checks passed');

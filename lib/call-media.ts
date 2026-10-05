@@ -12,3 +12,5 @@ export async function playRemoteMedia(video:HTMLVideoElement|null,audio:HTMLAudi
  ]);
  return results[1].status==='rejected'&&(results[1].reason as Error)?.name==='NotAllowedError';
 }
+
+export function attachLocalMedia(video:HTMLVideoElement|null,stream:MediaStream|null){if(!video||!stream)return;if(video.srcObject!==stream)video.srcObject=stream;video.muted=true;void video.play().catch(()=>{});}
