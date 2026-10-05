@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "yaaro",
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      "database_id": "8d4e1690-f407-45a7-9781-4c73e308993d",
       "migrations_dir": "drizzle"
     }
   ],
