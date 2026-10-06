@@ -1,5 +1,5 @@
 import {CommunityService} from './community-service';
-import type {SpaceAction,Space,SpaceDetail,SpacePost,SpaceNotice} from './spaces-model';
+import type {SpaceAction,Space,SpaceDetail,SpacePost,SpaceNotice,SpaceFeedFilter} from './spaces-model';
 const uuidSQL="lower(hex(randomblob(4)))||'-'||lower(hex(randomblob(2)))||'-'||lower(hex(randomblob(2)))||'-'||lower(hex(randomblob(2)))||'-'||lower(hex(randomblob(6)))";
 export class SpacesService{
  private people:CommunityService;
@@ -31,10 +31,15 @@ export class SpacesService{
    staff?this.stmt("SELECT id,target,post,resource,evidence,category,description,created_at FROM space_reports WHERE space=? AND status='pending' ORDER BY created_at LIMIT 50",id).all<any>():Promise.resolve({results:[]})
   ]);return {space,channels:channels.results,members:members.results,events:events.results,resources:resources.results,reports:reports.results};
  }
- async posts(id:string,filters:{channel?:string;parent?:string;saved?:boolean;before?:number;cursor?:string;post?:string}={}){
+ async posts(id:string,filters:{channel?:string;parent?:string;saved?:boolean;before?:number;cursor?:string;post?:string;q?:string;filter?:SpaceFeedFilter}={}){
   const {me}=await this.access(id);const where=['p.space=?','p.deleted=0',"m.status='active'",this.excluded,"NOT EXISTS(SELECT 1 FROM space_members banned WHERE banned.space=p.space AND banned.member=p.author AND banned.status='banned')"],v:any[]=[me,me,id,me,me];
   if(filters.post){await this.readPost(id,filters.post,me);where.push('p.id=?');v.push(filters.post);}else if(filters.parent){const parent=await this.readPost(id,filters.parent,me);if(parent.parent)throw Error('INVALID');where.push('p.parent=?');v.push(filters.parent);}else if(!filters.saved)where.push('p.parent IS NULL');
   if(filters.channel){where.push('p.channel=?');v.push(filters.channel);}if(filters.saved){where.push('EXISTS(SELECT 1 FROM space_saves WHERE post=p.id AND member=?)');v.push(me);}if(filters.before){where.push('(p.created_at<? OR (p.created_at=? AND p.id<?))');v.push(filters.before,filters.before,filters.cursor||'');}
+  if(filters.q?.trim()){const search='%'+filters.q.trim().replace(/[\\%_]/g,'\\$&')+'%';where.push("(p.body LIKE ? ESCAPE '\\' OR m.name LIKE ? ESCAPE '\\')");v.push(search,search);}
+  if(filters.filter==='unanswered')where.push("p.kind='question' AND p.accepted_reply IS NULL");
+  else if(filters.filter==='polls')where.push("p.kind='poll'");
+  else if(filters.filter==='announcements')where.push("p.kind='announcement'");
+  else if(filters.filter==='pinned')where.push('p.pinned=1');
   const rows=await this.stmt(`SELECT p.*,m.name AS authorName,COALESCE(sm.role,'member') AS authorRole,
   (SELECT COUNT(*) FROM space_likes WHERE post=p.id) AS likes,EXISTS(SELECT 1 FROM space_likes WHERE post=p.id AND member=?) AS liked,
   EXISTS(SELECT 1 FROM space_saves WHERE post=p.id AND member=?) AS saved,

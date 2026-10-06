@@ -38,3 +38,13 @@ html[data-theme=dark] .yaaro-social[data-page=spaces] .app-topbar{background:var
  .space-event-copy>small{align-items:flex-start;overflow-wrap:anywhere}
  .space-event-copy>small svg{margin-top:3px}
 }
+
+/* Conversation discovery stays compact while filters scroll on smaller screens. */
+.space-feed-tools{display:grid;gap:12px;margin-bottom:20px;min-width:0}
+.space-feed-filters{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin;max-width:100%}
+.space-feed-filters>button{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;min-height:42px;padding:9px 13px;border:1px solid var(--surface-border);border-radius:12px;background:var(--surface);color:var(--text-secondary);font-size:.75rem;font-weight:650}
+.space-feed-filters>button.selected{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-ink)}
+.space-feed-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--text-secondary);font-size:.73rem}
+.space-feed-summary .text-link{font-size:.73rem;flex-shrink:0}
+.space-feed-tools .spaces-search>.text-link{font-size:.73rem;flex-shrink:0}
+@media(max-width:600px){.space-feed-filters>button{min-height:44px}.space-feed-tools{gap:10px}.space-feed-summary{font-size:.7rem}}

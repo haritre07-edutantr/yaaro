@@ -2,6 +2,8 @@ import {z} from 'zod';
 export const spaceTopics=['Music','Gaming','Career','Study','Technology','Movies','Travel','Art & creativity','Wellbeing','Entrepreneurship','Other'] as const;
 const id=z.string().uuid(),body=z.string().trim().min(1).max(3000);
 const safeUrl=z.string().trim().max(1200).refine(v=>{try{const u=new URL(v);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}},'Use an HTTPS link without embedded credentials');
+export const spaceFeedFilter=z.enum(['all','unanswered','polls','announcements','pinned']);
+export type SpaceFeedFilter=z.infer<typeof spaceFeedFilter>;
 export const spaceDetails=z.object({name:z.string().trim().min(3).max(60),description:z.string().trim().min(20).max(700),topic:z.enum(spaceTopics),language:z.string().trim().min(2).max(40),access:z.enum(['open','approval']),rules:z.string().trim().min(20).max(2000)});
 export const spaceAction=z.discriminatedUnion('action',[
  z.object({action:z.literal('create'),id,details:spaceDetails}),
