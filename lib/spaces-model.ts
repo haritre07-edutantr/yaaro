@@ -15,6 +15,7 @@ export const spaceAction=z.discriminatedUnion('action',[
  z.object({action:z.literal('invite'),space:id,hours:z.number().int().min(1).max(168),maxUses:z.number().int().min(1).max(100)}),
  z.object({action:z.literal('revokeInvite'),space:id,hash:z.string().regex(/^[a-f0-9]{64}$/)}),
  z.object({action:z.literal('archive'),space:id}),
+ z.object({action:z.literal('deleteCommunity'),space:id,confirmation:z.literal('DELETE')}),
  z.object({action:z.literal('channelControl'),space:id,channel:id,name:z.string().trim().min(2).max(30),description:z.string().trim().max(150),readOnly:z.boolean(),archived:z.boolean(),position:z.number().int().min(0).max(12)}),
  z.object({action:z.literal('followChannel'),space:id,channel:id,enabled:z.boolean()}),
  z.object({action:z.literal('followDiscussion'),space:id,post:id,enabled:z.boolean()}),

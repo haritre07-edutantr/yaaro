@@ -1,3 +1,4 @@
+import {env} from 'cloudflare:workers';
 import {z} from 'zod';
 import {db,identity,guard,payload,failure} from '@/lib/server';
 import {SpacesService} from '@/lib/spaces-service';
@@ -9,4 +10,4 @@ export async function GET(req:Request){try{const u=await identity();if(!u)throw 
  else result=await service.list({q:q.has('q')?z.string().max(100).parse(q.get('q')):undefined,topic:q.has('topic')?z.string().max(40).parse(q.get('topic')):undefined,mine:q.get('mine')==='1',created:q.get('created')==='1',offset:q.has('offset')?z.coerce.number().int().min(0).max(10000).parse(q.get('offset')):undefined});
  return Response.json(result,{headers:{'Cache-Control':'no-store'}});
 }catch(e){return failure(e);}}
-export async function POST(req:Request){try{const u=await guard(req),a=spaceAction.parse(await payload(req));const result=await new SpacesService(db(),u.userId).act(a);const space='space' in a?a.space:'id' in result?String(result.id):undefined;if(space)await publishSpaceChange(space).catch(()=>{});return Response.json(result);}catch(e){return failure(e);}}
+export async function POST(req:Request){try{const u=await guard(req),a=spaceAction.parse(await payload(req));const result=await new SpacesService(db(),u.userId).act(a);const space='space' in a?a.space:'id' in result?String(result.id):undefined;if(space)await publishSpaceChange(space).catch(()=>{});if('mediaKeys' in result){if(env.BUCKET)await env.BUCKET.delete(result.mediaKeys as string[]).catch(()=>{});return Response.json({saved:true});}return Response.json(result);}catch(e){return failure(e);}}

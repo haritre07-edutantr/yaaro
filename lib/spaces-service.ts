@@ -120,6 +120,17 @@ export class SpacesService{
    }else{const expected=a.decision==='approve'||a.decision==='decline'?'pending':a.decision==='unban'?'banned':target.status;if(a.decision==='ban'&&!['active','pending'].includes(target.status))throw Error('FORBIDDEN');const next=a.decision==='approve'?'active':a.decision==='unban'?'left':a.decision==='decline'?'declined':'banned';const result=await this.stmt("UPDATE space_members SET status=?,role='member',muted_until=0 WHERE space=? AND member=? AND status=?",next,space.id,a.member,expected).run();if(!result.meta.changes)throw Error('CONFLICT');if(a.decision==='approve')await this.notify(space.id,'You’re in!','Your membership request was accepted. Introduce yourself and join the conversation.',a.member).run();}
    await this.audit(me,a.decision,space.id+':'+a.member);return {saved:true};
   }
+  if(a.action==='deleteCommunity'){
+   if(space.myRole!=='owner'||space.owner!==me||a.confirmation!=='DELETE')throw Error('FORBIDDEN');
+   const media=await this.stmt('SELECT logo_key,cover_key FROM interest_spaces WHERE id=? AND owner=?',space.id,me).first<{logo_key:string|null;cover_key:string|null}>();
+   const results=await this.db.batch([
+    this.stmt('DELETE FROM space_invite_redemptions WHERE token_hash IN (SELECT token_hash FROM space_invites WHERE space=?) AND EXISTS(SELECT 1 FROM interest_spaces WHERE id=? AND owner=?)',space.id,space.id,me),
+    this.stmt("INSERT INTO audit_logs(id,actor,action,target,created_at) SELECT ?,?,'community:deleted',?,? WHERE EXISTS(SELECT 1 FROM interest_spaces WHERE id=? AND owner=?)",crypto.randomUUID(),me,space.id,now,space.id,me),
+    this.stmt('DELETE FROM interest_spaces WHERE id=? AND owner=?',space.id,me)
+   ]);
+   if(!results[2].meta.changes)throw Error('CONFLICT');
+   return {saved:true,mediaKeys:[media?.logo_key,media?.cover_key].filter((key):key is string=>!!key)};
+  }
   if(a.action==='archive'){if(!spaceCapabilities(space.myRole||'').settings)throw Error('FORBIDDEN');await this.stmt('UPDATE interest_spaces SET archived=1,updated_at=? WHERE id=?',now,space.id).run();await this.audit(me,'archived',space.id);return {saved:true};}
   if(a.action==='invite'){if(!staff)throw Error('FORBIDDEN');const count=await this.stmt('SELECT COUNT(*) AS n FROM space_invites WHERE space=? AND revoked=0 AND expires_at>? AND uses<max_uses',space.id,now).first<{n:number}>();if((count?.n||0)>=10)throw Error('SPACE_LIMIT');const token=crypto.randomUUID(),hash=await this.hashToken(token);await this.stmt('INSERT INTO space_invites(token_hash,space,creator,expires_at,max_uses,created_at) VALUES(?,?,?,?,?,?)',hash,space.id,me,now+a.hours*3600000,a.maxUses,now).run();await this.audit(me,'inviteCreated',space.id);return {token};}
   if(a.action==='revokeInvite'){if(!staff)throw Error('FORBIDDEN');await this.stmt('UPDATE space_invites SET revoked=1 WHERE token_hash=? AND space=?',a.hash,space.id).run();await this.audit(me,'inviteRevoked',space.id);return {saved:true};}
