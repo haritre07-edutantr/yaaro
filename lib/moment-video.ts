@@ -1,5 +1,5 @@
 // Non-fragmented, self-contained MP4. Check both declared and sample-table time.
-export const MAX_MOMENT_VIDEO_BYTES=12*1024*1024;
+export const MAX_MOMENT_VIDEO_BYTES=30*1024*1024;
 type Box={type:string;start:number;end:number};
 export function validateMomentVideo(bytes:Uint8Array){
  const invalid=()=>{throw new Error('VIDEO_INVALID');};

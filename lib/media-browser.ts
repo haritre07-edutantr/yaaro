@@ -1,15 +1,15 @@
 import {encodeVoice} from './media-validation';
-export function isVideoUpload(file:File){return file.type.startsWith('video/')||(!file.type&&/\.(mp4|mov|m4v)$/i.test(file.name));}
-export async function prepareChatPhoto(file:File){
- const supported=['image/jpeg','image/png','image/webp','image/heic','image/heif'];
- if((!supported.includes(file.type)&&!(file.type===''&&/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)))||file.size>5242880)throw new Error('Choose a JPEG, PNG, WebP, or iPhone HEIC photo under 5 MB.');
+export function isVideoUpload(file:File){return file.type.startsWith('video/')||(!file.type&&/\.(mp4|mov|m4v|webm|mkv|avi|3gp|mpeg|mpg|ogv)$/i.test(file.name));}
+export async function prepareChatPhoto(file:File,options:{maxBytes?:number;broadFormats?:boolean}={}){
+ const supported=['image/jpeg','image/png','image/webp','image/heic','image/heif',...(options.broadFormats?['image/avif','image/gif','image/bmp','image/x-ms-bmp','image/tiff','image/jxl']:[])],maxBytes=options.maxBytes??5*1024*1024;
+ if((!supported.includes(file.type)&&!(file.type===''&&(options.broadFormats?/\.(jpe?g|png|webp|heic|heif|avif|gif|bmp|tiff?|jxl)$/i:/\.(jpe?g|png|webp|heic|heif)$/i).test(file.name)))||file.size>maxBytes)throw new Error(`Choose a supported photo up to ${maxBytes/(1024*1024)} MB. JPEG, PNG, WebP and iPhone HEIC are supported where your browser can decode them.`);
  // Safari can decode native HEIC with an image element even when ImageBitmap fails.
  const url=URL.createObjectURL(file),image=new Image();let bitmap:ImageBitmap|undefined;
  try{
   let source:CanvasImageSource=image,width=0,height=0;
   try{await new Promise<void>((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('PHOTO_DECODE')),15000);image.onload=()=>{clearTimeout(timer);resolve();};image.onerror=()=>{clearTimeout(timer);reject(new Error('PHOTO_DECODE'));};image.src=url;});width=image.naturalWidth;height=image.naturalHeight;}
   catch{if(typeof createImageBitmap!=='function')throw new Error('This browser could not open your photo. Choose a JPEG or use Camera.');try{bitmap=await createImageBitmap(file);source=bitmap;width=bitmap.width;height=bitmap.height;}catch{throw new Error('This browser could not open your photo. For HEIC, use an updated Safari or choose a JPEG.');}}
-  if(!width||!height||width>10000||height>10000||width*height>40000000)throw new Error('Choose a smaller photo.');
+  if(!width||!height||width>10000||height>10000||width*height>(options.broadFormats?60000000:40000000))throw new Error('Choose a smaller photo.');
   const ratio=Math.min(1,512/Math.max(width,height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(width*ratio));canvas.height=Math.max(1,Math.round(height*ratio));const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Photo preparation is unavailable.');ctx.drawImage(source,0,0,canvas.width,canvas.height);
   return await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob&&blob.size<=1048576?resolve(blob):reject(new Error('Choose a simpler or smaller photo.')),'image/png'));
  }finally{bitmap?.close();image.onload=null;image.onerror=null;image.removeAttribute('src');URL.revokeObjectURL(url);}
@@ -23,8 +23,8 @@ export async function captureVoice():Promise<VoiceCapture>{
  }catch(error){stream.getTracks().forEach(track=>track.stop());void context?.close();throw error;}
 }
 
-export async function prepareMomentVideo(file:File){
- if(!isVideoUpload(file)||file.size>12*1024*1024)throw new Error('Choose an MP4 or compatible iPhone MOV video under 12 MB.');
+export async function prepareMomentVideo(file:File,maxBytes=12*1024*1024){
+ if(!isVideoUpload(file)||file.size>maxBytes)throw new Error(`Choose an MP4 or compatible iPhone MOV video up to ${maxBytes/(1024*1024)} MB.`);
  const {normalizeMomentVideo}=await import('./moment-video');let prepared:File;
  try{const bytes=normalizeMomentVideo(new Uint8Array(await file.arrayBuffer()));prepared=new File([bytes as Uint8Array<ArrayBuffer>],'moment.mp4',{type:'video/mp4'});}catch(e){throw new Error((e as Error).message==='VIDEO_TOO_LONG'?'Videos can be no longer than 10 seconds.':'This video format is unsupported. On iPhone, record with Settings → Camera → Formats → Most Compatible, or choose an H.264 MP4, up to 10 seconds.');}
  const url=URL.createObjectURL(prepared),video=document.createElement('video');video.preload='metadata';video.muted=true;video.playsInline=true;

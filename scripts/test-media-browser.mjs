@@ -17,3 +17,10 @@ width=12000;await assert.rejects(()=>prepareChatPhoto(heic),/smaller photo/);ass
 await assert.rejects(()=>prepareChatPhoto(new File(['svg'],'bad.svg',{type:'image/svg+xml'})),/Choose/);
 assert.equal(isVideoUpload(new File(['mov'],'video.mov',{type:'video/quicktime'})),true);assert.equal(isVideoUpload(new File(['mov'],'video.MOV')),true);assert.equal(isVideoUpload(heic),false);
 console.log('iOS photo decoding, bitmap fallback, cleanup, input validation and native video classification checks passed');
+
+width=1200;const largePhoto=new File([new Uint8Array(6*1024*1024)],'large.jpg',{type:'image/jpeg'});
+await assert.rejects(()=>prepareChatPhoto(largePhoto),/5 MB/);
+assert.equal((await prepareChatPhoto(largePhoto,{maxBytes:15*1024*1024,broadFormats:true})).type,'image/png','Moments accepts larger photos without increasing chat limits');
+await assert.rejects(()=>prepareChatPhoto(new File([new Uint8Array(15*1024*1024+1)],'large.jpg',{type:'image/jpeg'}),{maxBytes:15*1024*1024,broadFormats:true}),/15 MB/);
+assert.equal((await prepareChatPhoto(new File(['avif'],'image.avif',{type:'image/avif'}),{maxBytes:15*1024*1024,broadFormats:true})).type,'image/png','Additional raster formats use canonical photo conversion');
+console.log('Moments 15 MB photo limit and broader raster input checks passed');
