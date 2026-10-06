@@ -27,5 +27,21 @@
     "PUBLIC_APP_ORIGIN": "https://autumn-lake-80feyaaro.haritre07.workers.dev",
     "AUTH_EMAIL_DELIVERY_READY": "true",
     "SUPER_ADMIN_USER_ID": ""
-  }
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SPACE_HUB",
+        "class_name": "CommunityHub"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "community-hub-v1",
+      "new_sqlite_classes": [
+        "CommunityHub"
+      ]
+    }
+  ]
 }

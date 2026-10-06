@@ -1,9 +1,13 @@
 import handler from 'vinext/server/fetch-handler';
+import {communitySocketResponse} from '../lib/space-socket';
+export {CommunityHub} from '../lib/space-hub';
 export default {
   async fetch(request:Request,env:Cloudflare.Env,ctx:ExecutionContext) {
+    if(new URL(request.url).pathname==='/api/space-stream'&&request.headers.get('Upgrade')==='websocket')return communitySocketResponse(request,env);
     const headers=new Headers(request.headers);
     for(const name of [...headers.keys()]) if(name.startsWith('oai-')) headers.delete(name);
     const response=await handler.fetch(new Request(request,{headers}),env,ctx);
+    if(response.status===101)return response;
     const secured=new Response(response.body,response);
     secured.headers.set('X-Content-Type-Options','nosniff');
     secured.headers.set('Referrer-Policy','strict-origin-when-cross-origin');

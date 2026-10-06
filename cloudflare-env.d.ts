@@ -9,6 +9,7 @@ declare namespace Cloudflare {
     TURN_SHARED_SECRET?: string;
     CLOUDFLARE_TURN_KEY_ID?: string;
     CLOUDFLARE_TURN_API_TOKEN?: string;
+    SPACE_HUB?: DurableObjectNamespace;
     DB?: D1Database;
     BUCKET?: R2Bucket;
   }
