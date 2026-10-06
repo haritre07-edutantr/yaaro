@@ -1,5 +1,5 @@
 import {CommunityService} from './community-service';
-import type {SpaceAction,Space,SpaceDetail,SpacePost,SpaceNotice,SpaceFeedFilter} from './spaces-model';
+import type {SpaceAction,Space,SpaceDetail,SpacePost,SpaceNotice,SpaceFeedFilter,SpaceEventView} from './spaces-model';
 const uuidSQL="lower(hex(randomblob(4)))||'-'||lower(hex(randomblob(2)))||'-'||lower(hex(randomblob(2)))||'-'||lower(hex(randomblob(2)))||'-'||lower(hex(randomblob(6)))";
 export class SpacesService{
  private people:CommunityService;
@@ -50,6 +50,15 @@ export class SpacesService{
   const ids=rows.results.slice(0,30).filter(p=>p.kind==='poll').map(p=>p.id);
   const counts=ids.length?await this.stmt(`SELECT post,choice,COUNT(*) AS n FROM space_votes WHERE post IN (${ids.map(()=>'?').join(',')}) GROUP BY post,choice`,...ids).all<any>():{results:[]};
   const visibleRows=rows.results.slice(0,30);if(filters.parent)visibleRows.reverse();const posts:SpacePost[]=visibleRows.map(p=>{const options=p.options?JSON.parse(p.options):[];return {...p,options,liked:!!p.liked,saved:!!p.saved,votes:options.map((_:string,n:number)=>counts.results.find(c=>c.post===p.id&&c.choice===n)?.n||0),myVote:p.myVote??null};});return {posts,hasMore:rows.results.length>30};
+ }
+ async events(id:string,filters:{q?:string;view?:SpaceEventView;offset?:number}={}){
+  const {me}=await this.access(id),view=filters.view||'upcoming',now=Date.now();
+  const where=['e.space=?',"m.status='active'",this.excluded,"NOT EXISTS(SELECT 1 FROM space_members WHERE space=e.space AND member=e.host AND status='banned')"],values:any[]=[me,id,me,me];
+  if(view==='cancelled')where.push('e.cancelled=1');
+  else{where.push('e.cancelled=0');where.push(view==='past'?'e.starts_at+e.duration*60000<=?':'e.starts_at+e.duration*60000>?');values.push(now);if(view==='plans'){where.push("EXISTS(SELECT 1 FROM space_rsvps WHERE event=e.id AND member=? AND response IN ('going','interested'))");values.push(me);}}
+  if(filters.q?.trim()){const search='%'+filters.q.trim().replace(/[\\%_]/g,'\\$&')+'%';where.push("(e.title LIKE ? ESCAPE '\\' OR e.description LIKE ? ESCAPE '\\' OR m.name LIKE ? ESCAPE '\\')");values.push(search,search,search);}
+  const rows=await this.stmt(`SELECT e.*,m.name AS hostName,(SELECT COUNT(*) FROM space_rsvps WHERE event=e.id AND response='going') AS going,(SELECT COUNT(*) FROM space_rsvps WHERE event=e.id AND response='interested') AS interested,(SELECT response FROM space_rsvps WHERE event=e.id AND member=?) AS myRsvp FROM space_events e JOIN members m ON m.id=e.host WHERE ${where.join(' AND ')} ORDER BY e.starts_at ${view==='past'||view==='cancelled'?'DESC':'ASC'},e.id LIMIT 21 OFFSET ?`,...values,filters.offset||0).all<any>();
+  return {events:rows.results.slice(0,20),hasMore:rows.results.length>20};
  }
  async members(id:string,filters:{q?:string;status?:string;offset?:number}={}){
   const {me,staff}=await this.access(id);const status=staff?(filters.status||'active'):'active';
