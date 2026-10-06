@@ -18,7 +18,7 @@ export class CommunityService{
  async conversationAccess(id:string,call=false){const me=await this.requireMember();const {c,peer}=await this.readable(id,me);if(call&&(JSON.parse(me.privacy).calls==='Nobody'||JSON.parse(peer.privacy).calls==='Nobody'))throw new Error('FORBIDDEN');return {me,peer,c};}
  async memberId(){return (await this.requireMember()).id;}
  async publicMember(id:string){return this.public(await this.target(id),true);}
- async snapshot(filters:{q?:string;vibe?:string;language?:string;interest?:string;offset?:number}={}):Promise<Snapshot>{
+ async snapshot(filters:{q?:string;vibe?:string;language?:string;interest?:string;region?:string;offset?:number}={}):Promise<Snapshot>{
   const me=await this.member();if(!me)return {me:null,people:[],connections:[],blocked:[],hasMore:false};
   const relationships=await this.stmt(`SELECT f.id AS connection_id, f.status AS connection_status, f.requester, f.updated_at, m.*,
    COALESCE(cp.pinned,0) AS chat_pinned, COALESCE(cp.favorite,0) AS chat_favorite, COALESCE(cp.disappearing,0) AS chat_disappearing,
@@ -34,7 +34,8 @@ export class CommunityService{
   const exclusions='NOT EXISTS (SELECT 1 FROM member_blocks b WHERE (b.blocker = ? AND b.blocked = m.id) OR (b.blocker = m.id AND b.blocked = ?))';
   const visible="(json_extract(m.privacy, '$.discover') = 'Everyone' OR (json_extract(m.privacy, '$.discover') = 'Connections only' AND EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted' AND ((f.member_a = m.id AND f.member_b = ?) OR (f.member_b = m.id AND f.member_a = ?)))))";
   const terms=['m.published = 1',"m.status = 'active'",'m.id != ?',exclusions,visible];const params:any[]=[me.id,me.id,me.id,me.id,me.id];
-  if(filters.q){terms.push('(m.name LIKE ? OR m.bio LIKE ?)');params.push('%'+filters.q+'%','%'+filters.q+'%');}
+  if(filters.q?.trim()){terms.push("(m.name LIKE ? ESCAPE '\\' OR m.bio LIKE ? ESCAPE '\\' OR (m.region!='Prefer not to say' AND m.region LIKE ? ESCAPE '\\'))");const q='%'+filters.q.trim().replace(/[\\%_]/g,'\\$&')+'%';params.push(q,q,q);}
+  if(filters.region?.trim()){terms.push("m.region!='Prefer not to say' AND m.region!='Other region' AND m.region LIKE ? ESCAPE '\\'");params.push('%'+filters.region.trim().replace(/[\\%_]/g,'\\$&')+'%');}
   if(filters.vibe){terms.push('m.vibe = ?');params.push(filters.vibe);}if(filters.language){terms.push('EXISTS (SELECT 1 FROM json_each(m.languages) WHERE value = ?)');params.push(filters.language);}if(filters.interest){terms.push('EXISTS (SELECT 1 FROM json_each(m.interests) WHERE value = ?)');params.push(filters.interest);}
   const rows=await this.stmt(`SELECT m.* FROM members m WHERE ${terms.join(' AND ')} ORDER BY m.created_at DESC, m.id LIMIT 25 OFFSET ?`,...params,filters.offset||0).all<Row>();
   const blocks=await this.stmt('SELECT m.* FROM members m JOIN member_blocks b ON b.blocked = m.id WHERE b.blocker = ? LIMIT 100',me.id).all<Row>();

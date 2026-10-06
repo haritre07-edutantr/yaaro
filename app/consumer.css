@@ -74,3 +74,5 @@ html[data-theme=dark] body:has(.yaaro-social),html[data-theme=dark] .yaaro-socia
 }
 
 @media(max-width:767px) and (prefers-reduced-motion:reduce){.yaaro-social .real-bottom.premium-mobile-nav>.main-connect.premium-create>span{transform:translateY(-20px)!important}}
+
+.yaaro-social .explorer-location-search{width:100%;margin-top:12px;max-width:none}.yaaro-social .explorer-location-search>svg{flex-shrink:0}.yaaro-social .explorer-active-filters button{max-width:100%;overflow-wrap:anywhere}.yaaro-social .explorer-active-filters button>svg{flex-shrink:0}
