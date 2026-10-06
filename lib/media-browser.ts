@@ -23,10 +23,14 @@ export async function captureVoice():Promise<VoiceCapture>{
  }catch(error){stream.getTracks().forEach(track=>track.stop());void context?.close();throw error;}
 }
 
-export async function prepareMomentVideo(file:File,maxBytes=12*1024*1024){
+export async function prepareMomentVideo(file:File,maxBytes=12*1024*1024,onProgress?:(progress:number)=>void){
  if(!isVideoUpload(file)||file.size>maxBytes)throw new Error(`Choose an MP4 or compatible iPhone MOV video up to ${maxBytes/(1024*1024)} MB.`);
  const {normalizeMomentVideo}=await import('./moment-video');let prepared:File;
- try{const bytes=normalizeMomentVideo(new Uint8Array(await file.arrayBuffer()));prepared=new File([bytes as Uint8Array<ArrayBuffer>],'moment.mp4',{type:'video/mp4'});}catch(e){throw new Error((e as Error).message==='VIDEO_TOO_LONG'?'Videos can be no longer than 10 seconds.':'This video format is unsupported. On iPhone, record with Settings → Camera → Formats → Most Compatible, or choose an H.264 MP4, up to 10 seconds.');}
+ try{const bytes=normalizeMomentVideo(new Uint8Array(await file.arrayBuffer()));prepared=new File([bytes as Uint8Array<ArrayBuffer>],'moment.mp4',{type:'video/mp4'});}catch(e){
+  if((e as Error).message==='VIDEO_TOO_LONG')throw new Error('Videos can be no longer than 10 seconds.');
+  try{const {convertPhoneVideo}=await import('./video-conversion');prepared=await convertPhoneVideo(file,maxBytes,onProgress);}
+  catch(error){const code=(error as Error).message;throw new Error(code==='VIDEO_TOO_LONG'?'Videos can be no longer than 10 seconds.':code==='VIDEO_OUTPUT_TOO_LARGE'?`The converted video is larger than ${maxBytes/(1024*1024)} MB. Choose a smaller clip.`:code==='VIDEO_CONVERSION_TIMEOUT'?'Video conversion took too long. Try a smaller recording.':'Your browser could not convert this recording. Try an updated Safari or Chrome, or choose a different video.');}
+ }
  const url=URL.createObjectURL(prepared),video=document.createElement('video');video.preload='metadata';video.muted=true;video.playsInline=true;
  try{await new Promise<void>((resolve,reject)=>{const timeout=setTimeout(()=>reject(new Error('Unable to read this video. Try another MP4.')),10000);video.onloadedmetadata=()=>{clearTimeout(timeout);Number.isFinite(video.duration)&&video.duration>0&&video.duration<=10?resolve():reject(new Error('Videos can be no longer than 10 seconds.'));};video.onerror=()=>{clearTimeout(timeout);reject(new Error('This video cannot play in your browser. Choose another MP4.'));};video.src=url;video.load();});return prepared;}
  finally{video.removeAttribute('src');video.load();URL.revokeObjectURL(url);}
