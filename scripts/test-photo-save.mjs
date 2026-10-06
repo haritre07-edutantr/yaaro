@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
+import ts from 'typescript';
+const dir=new URL('../.sites-runtime/photo-save-tests/',import.meta.url);mkdirSync(dir,{recursive:true});
+for(const name of ['profile-photo-upload','services'])writeFileSync(new URL(`${name}.mjs`,dir),ts.transpileModule(readFileSync(new URL(`../lib/${name}.ts`,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText);
+const {readPhotoSaveResponse,saveProfilePhoto}=await import(new URL('profile-photo-upload.mjs',dir));const {api}=await import(new URL('services.mjs',dir));
+await readPhotoSaveResponse(Response.json({saved:true}));
+for(const response of [new Response('',{status:200}),new Response('<html>Worker error</html>',{status:503}),Response.json({saved:false}),Response.json({saved:true},{status:500})])await assert.rejects(()=>readPhotoSaveResponse(response),/could not be confirmed/);
+await assert.rejects(()=>readPhotoSaveResponse(new Response('',{status:401})),/session expired/);await assert.rejects(()=>readPhotoSaveResponse(Response.json({error:'Please wait.'},{status:429})),/Please wait/);
+const photo=new Blob(['PNG bytes'],{type:'image/png'});let called=0;
+globalThis.fetch=async(path,options)=>{called++;assert.equal(path,'/api/photo');assert.equal(options.credentials,'same-origin');assert.equal(options.cache,'no-store');if(options.method==='POST'){assert.equal(options.headers['Content-Type'],'image/png');assert.ok(options.body instanceof ArrayBuffer);assert.equal(new TextDecoder().decode(options.body),'PNG bytes');}else{assert.equal(options.method,'DELETE');assert.equal(options.body,undefined);}return Response.json({saved:true});};
+await saveProfilePhoto(photo);await saveProfilePhoto(null);assert.equal(called,2);
+globalThis.fetch=async()=>{throw new Error('The string did not match the expected pattern.');};await assert.rejects(()=>saveProfilePhoto(photo),/could not reach YAARO/);
+globalThis.fetch=async()=>new Response('<html>Error</html>',{status:502});await assert.rejects(()=>api('/api/community','POST',{}),/unexpected response \(HTTP 502\)/);
+globalThis.fetch=async()=>Response.json({error:'Request denied'},{status:403});await assert.rejects(()=>api('/api/community'),/Request denied/);
+globalThis.fetch=async()=>Response.json({me:{id:'member'}});assert.equal((await api('/api/community')).me.id,'member');
+console.log('Photo byte transport, malformed/empty response handling, honest success confirmation and API error checks passed');
