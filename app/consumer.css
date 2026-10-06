@@ -84,3 +84,9 @@ html[data-theme=dark] body:has(.yaaro-social),html[data-theme=dark] .yaaro-socia
 .yaaro-social .explorer-active-filters{align-items:center;gap:8px;padding:4px 0 18px}
 .yaaro-social .explorer-active-filters>button{min-height:32px;line-height:1.3;justify-content:center;padding:7px 10px;margin:0}
 .yaaro-social .explorer-active-filters>.explorer-clear{background:transparent;color:var(--text-secondary)}
+
+.yaaro-overlay.yaaro-centered-overlay{display:flex;align-items:center!important;justify-content:center;padding:16px}
+.yaaro-overlay.yaaro-centered-overlay>.modal{margin:0!important;width:min(100%,520px);max-height:calc(100dvh - 32px)}
+.profile-menu-theme{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 10px;border-bottom:1px solid var(--surface-border)}
+.profile-menu-theme b{display:block;font-size:14px}.profile-menu-theme small{display:block;color:var(--text-secondary);font-size:12px;margin-top:4px}.profile-menu-theme .theme-control{display:grid;place-items:center;flex-shrink:0;width:42px;height:42px;background:var(--surface-soft);border:1px solid var(--surface-border);border-radius:12px;color:var(--text-primary)}
+.yaaro-social .real-bottom.premium-mobile-nav>button>span>.avatar{width:29px;height:29px;min-width:29px;aspect-ratio:1;border-radius:50%;margin:0;border:1px solid var(--surface-border);flex-shrink:0}
