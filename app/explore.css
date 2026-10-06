@@ -3,3 +3,29 @@
 :root[data-theme='dark'] .explore-search,:root[data-theme='dark'] .explore-session{background:#0e1c2c;border-color:#26394d}:root[data-theme='dark'] .explore-modes>button{background:#102033;border-color:#293a4f}:root[data-theme='dark'] .explore-modes>.selected{background:#0f333d;border-color:#26c3b4}:root[data-theme='dark'] .explore-filter-box{background:#101e2e;border-color:#293a4f}:root[data-theme='dark'] .explore-filter-grid input,:root[data-theme='dark'] .explore-filter-grid select,:root[data-theme='dark'] .explore-composer input{background:#0c1928;color:#eef7fb;border-color:#2b3d50}:root[data-theme='dark'] .explore-message{background:#142538;border-color:#2b3d50}:root[data-theme='dark'] .explore-message.own{background:#12363f}:root[data-theme='dark'] .explore-message p{color:#edf7fb}:root[data-theme='dark'] .explore-connect .button.outline{background:#142538;color:#e9f4ff;border-color:#2b3d50}
 @media(max-width:520px){.explore-connect{padding-top:8px;padding-bottom:28px}.explore-intro{margin-bottom:22px}.explore-search{padding:18px}.explore-art{padding:23px;margin-bottom:24px}.explore-modes{gap:8px}.explore-modes>button{padding:18px 5px;min-height:144px;border-radius:17px}.explore-modes small{font-size:.65rem}.explore-filter-box{padding:14px;margin:22px 0}.explore-filter-grid{gap:14px 10px}.explore-session header{padding:18px 14px;gap:10px}.explore-session header .avatar{width:50px;height:50px;min-width:50px;flex-basis:50px}.explore-session-note{padding:14px}.explore-session footer{padding:16px}.explore-session footer .button{width:100%}.explore-intro p{font-size:.9rem}.explore-question{font-size:1.18rem}}
 @media(prefers-reduced-motion:reduce){.explore-search,.explore-session,.explore-spinner{animation:none}}
+
+/* Keep exploration geometry independent of generic social cards and labels. */
+.yaaro-social .explore-connect{scroll-margin-top:88px;padding-bottom:44px}
+.yaaro-social .explore-session header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center}
+.yaaro-social .explore-session header h2{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;line-height:1.3}
+.yaaro-social .explore-session header h2 small{font-size:.8rem;font-weight:400}
+.yaaro-social .explore-session header .icon-button{align-self:center;flex-shrink:0}
+.yaaro-social .explore-session-note{align-items:center;gap:12px}
+.yaaro-social .explore-hello,.yaaro-social .explore-call-ready{width:100%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px 20px;text-align:center}
+.yaaro-social .explore-hello>svg,.yaaro-social .explore-call-ready>svg{display:block;flex-shrink:0;margin:0 auto 2px}
+.yaaro-social .explore-hello h3,.yaaro-social .explore-call-ready h3{margin:0;line-height:1.4;max-width:100%;overflow-wrap:anywhere}
+.yaaro-social .explore-hello p,.yaaro-social .explore-call-ready p{margin:0;line-height:1.7;max-width:360px}
+.yaaro-social .explore-call-ready{min-height:240px}
+.yaaro-social .explore-call-ready .button{align-self:center;max-width:100%;margin-top:4px}
+.yaaro-social .explore-composer input{margin:0;height:48px;line-height:1.4}
+.yaaro-social .explore-session footer{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:16px}
+.yaaro-social .explore-session footer>.button{grid-column:1/-1;justify-content:center;min-height:46px;width:100%;margin:0}
+.yaaro-social .explore-session footer>.text-link{justify-self:start;white-space:nowrap}
+.yaaro-social .explore-session footer>span{min-width:0;line-height:1.6}
+.yaaro-social .explore-filter-box{margin:24px 0;padding:18px;min-inline-size:0}
+.yaaro-social .explore-filter-box legend{margin:0;line-height:1.4}
+.yaaro-social .explore-filter-grid label{display:flex;flex-direction:column;align-items:stretch;margin:0;gap:8px}
+.yaaro-social .explore-filter-grid select,.yaaro-social .explore-filter-grid input{display:block;width:100%;min-width:0;max-width:100%;margin:0;box-sizing:border-box;height:48px;line-height:1.3;padding:10px 32px 10px 12px}
+.yaaro-social .explore-modes>button{min-width:0;align-items:center;justify-content:center;text-align:center}
+@media(max-width:520px){.yaaro-social .explore-search{padding:16px}.yaaro-social .explore-filter-box{padding:16px 12px}.yaaro-social .explore-filter-grid{gap:16px 10px}.yaaro-social .explore-call-ready,.yaaro-social .explore-hello{padding:28px 16px}.yaaro-social .explore-session-note{padding:14px;align-items:flex-start}.yaaro-social .explore-session-note>span{flex:1;text-align:right;line-height:1.5}.yaaro-social .explore-session header{padding:20px 14px}.yaaro-social .explore-connect{padding-bottom:60px}.yaaro-social .explore-filter-grid select{font-size:16px}}
+@media(max-width:360px){.yaaro-social .explore-filter-grid{grid-template-columns:1fr}.yaaro-social .explore-question{font-size:1.05rem}.yaaro-social .explore-session footer{grid-template-columns:1fr}.yaaro-social .explore-session footer>.button{grid-column:auto}}
