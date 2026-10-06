@@ -29,3 +29,16 @@
 .yaaro-social .explore-modes>button{min-width:0;align-items:center;justify-content:center;text-align:center}
 @media(max-width:520px){.yaaro-social .explore-search{padding:16px}.yaaro-social .explore-filter-box{padding:16px 12px}.yaaro-social .explore-filter-grid{gap:16px 10px}.yaaro-social .explore-call-ready,.yaaro-social .explore-hello{padding:28px 16px}.yaaro-social .explore-session-note{padding:14px;align-items:flex-start}.yaaro-social .explore-session-note>span{flex:1;text-align:right;line-height:1.5}.yaaro-social .explore-session header{padding:20px 14px}.yaaro-social .explore-connect{padding-bottom:60px}.yaaro-social .explore-filter-grid select{font-size:16px}}
 @media(max-width:360px){.yaaro-social .explore-filter-grid{grid-template-columns:1fr}.yaaro-social .explore-question{font-size:1.05rem}.yaaro-social .explore-session footer{grid-template-columns:1fr}.yaaro-social .explore-session footer>.button{grid-column:auto}}
+
+/* Place the preferences heading inside the card instead of on its border. */
+.yaaro-social .explore-preferences{margin:24px 0;padding:20px;border:1px solid var(--line);border-radius:20px;min-width:0;background:var(--bg)}
+.yaaro-social .explore-preferences>h3{display:flex;align-items:center;gap:9px;margin:0 0 20px;padding:0;font-size:.95rem;line-height:1.4;color:var(--ink);font-weight:600}
+.yaaro-social .explore-preferences>h3>svg{flex:0 0 17px;color:#12b8ac}
+.yaaro-social .explore-preferences>.explore-filter-box{border:0;padding:0;margin:0;background:transparent;border-radius:0;min-width:0;width:100%}
+.yaaro-social .explore-preferences .explore-filter-grid{align-items:start;gap:18px 14px}
+.yaaro-social .explore-preferences .explore-filter-grid label{font-size:.82rem;line-height:1.4;gap:8px;color:var(--ink)}
+.yaaro-social .explore-preferences .explore-filter-grid select,.yaaro-social .explore-preferences .explore-filter-grid input{height:50px;border-radius:12px;padding:12px 34px 12px 14px}
+:root[data-theme='dark'] .yaaro-social .explore-preferences{background:#101e2e;border-color:#293a4f}
+:root[data-theme='dark'] .yaaro-social .explore-preferences>h3,:root[data-theme='dark'] .yaaro-social .explore-preferences label{color:#e9f4ff}
+@media(max-width:520px){.yaaro-social .explore-preferences{padding:18px 16px;margin:22px 0}.yaaro-social .explore-preferences>h3{margin-bottom:18px}.yaaro-social .explore-preferences .explore-filter-grid{gap:18px 12px}}
+@media(max-width:420px){.yaaro-social .explore-preferences .explore-filter-grid{grid-template-columns:minmax(0,1fr)}.yaaro-social .explore-preferences .explore-filter-grid label{width:100%}.yaaro-social .explore-preferences .explore-region{grid-column:auto}}
