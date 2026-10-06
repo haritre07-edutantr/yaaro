@@ -9,9 +9,9 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "node scripts/check-deploy.mjs && wrangler deploy",
+    "deploy": "node scripts/check-deploy.mjs && wrangler d1 migrations apply yaaro --remote && wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "test": "node scripts/test-community.mjs && node scripts/test-auth.mjs && node scripts/test-turn.mjs && node scripts/test-call-media.mjs && node scripts/test-call-ice.mjs && node scripts/test-incoming-calls.mjs && node scripts/test-quick-connect.mjs && node scripts/test-responsive-delivery.mjs && node scripts/test-sounds.mjs && node scripts/test-call-controls.mjs && node scripts/test-spaces.mjs && node scripts/test-premium-spaces.mjs && node scripts/test-space-realtime.mjs",
+    "test": "node scripts/test-community.mjs && node scripts/test-explore.mjs && node scripts/test-auth.mjs && node scripts/test-turn.mjs && node scripts/test-call-media.mjs && node scripts/test-call-ice.mjs && node scripts/test-incoming-calls.mjs && node scripts/test-quick-connect.mjs && node scripts/test-responsive-delivery.mjs && node scripts/test-sounds.mjs && node scripts/test-call-controls.mjs && node scripts/test-spaces.mjs && node scripts/test-premium-spaces.mjs && node scripts/test-space-realtime.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply yaaro --local",
     "db:migrate:remote": "wrangler d1 migrations apply yaaro --remote"

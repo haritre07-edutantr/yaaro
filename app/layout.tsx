@@ -5,6 +5,7 @@ import "./theme.css";
 import "./premium.css";
 import "./spaces.css";
 import "./consumer.css";
+import "./explore.css";
 import {ThemeProvider} from "@/components/theme";
 import {SoundProvider} from "@/components/sounds";
 import CallProvider from '@/components/call-provider';

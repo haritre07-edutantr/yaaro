@@ -1,7 +1,9 @@
+import {ExploreService} from '../lib/explore-service';
 import handler from 'vinext/server/fetch-handler';
 import {communitySocketResponse} from '../lib/space-socket';
 export {CommunityHub} from '../lib/space-hub';
 export default {
+  scheduled(_event:ScheduledController,env:Cloudflare.Env,ctx:ExecutionContext){if(!env.DB)return;ctx.waitUntil(new ExploreService(env.DB,'').cleanup().catch(()=>{console.error('Exploration cleanup failed');}));},
   async fetch(request:Request,env:Cloudflare.Env,ctx:ExecutionContext) {
     if(new URL(request.url).pathname==='/api/space-stream'&&request.headers.get('Upgrade')==='websocket')return communitySocketResponse(request,env);
     const headers=new Headers(request.headers);

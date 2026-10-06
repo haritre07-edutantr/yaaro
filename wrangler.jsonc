@@ -7,6 +7,7 @@
     "nodejs_compat"
   ],
   "workers_dev": true,
+  "triggers": {"crons": ["*/5 * * * *"]},
   "d1_databases": [
     {
       "binding": "DB",
