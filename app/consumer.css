@@ -90,3 +90,26 @@ html[data-theme=dark] body:has(.yaaro-social),html[data-theme=dark] .yaaro-socia
 .profile-menu-theme{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 10px;border-bottom:1px solid var(--surface-border)}
 .profile-menu-theme b{display:block;font-size:14px}.profile-menu-theme small{display:block;color:var(--text-secondary);font-size:12px;margin-top:4px}.profile-menu-theme .theme-control{display:grid;place-items:center;flex-shrink:0;width:42px;height:42px;background:var(--surface-soft);border:1px solid var(--surface-border);border-radius:12px;color:var(--text-primary)}
 .yaaro-social .real-bottom.premium-mobile-nav>button>span>.avatar{width:29px;height:29px;min-width:29px;aspect-ratio:1;border-radius:50%;margin:0;border:1px solid var(--surface-border);flex-shrink:0}
+
+/* Cover-free profile and editorial connection artwork. */
+.yaaro-social .premium-profile .instagram-profile-top{margin-top:0;padding:26px 28px 0;gap:24px}
+.yaaro-social .premium-profile .social-profile-stats{margin-top:0;align-items:center}
+.yaaro-social .connect-premium-art{position:relative;isolation:isolate;overflow:hidden;min-height:245px;margin-bottom:28px;border:1px solid #67dbe332;border-radius:22px;background:radial-gradient(ellipse at 95% 15%,#12c7b532,transparent 58%),radial-gradient(ellipse at 5% 100%,#1769e044,transparent 60%),#081b30;text-align:left;color:#f5fbff;padding:28px}
+.connect-art-grid{position:absolute;inset:0;z-index:-1;opacity:.12;background-image:linear-gradient(#91d5eb33 1px,transparent 1px),linear-gradient(90deg,#91d5eb33 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(120deg,transparent,#000)}
+.connect-art-label{display:block;color:#86e5e2;font-size:10px;letter-spacing:.2em;font-weight:700}
+.connect-art-title{position:relative;z-index:2;margin-top:17px;font-size:34px;line-height:1.12;letter-spacing:-.045em;font-weight:650;max-width:65%}
+.connect-art-title>span{background:linear-gradient(100deg,#81bbff,#8ef1d8);background-clip:text;-webkit-background-clip:text;color:transparent}
+.connect-art-tile{position:absolute;display:flex;align-items:center;gap:12px;padding:15px 17px;border:1px solid #93e2ef38;border-radius:16px;background:#102d43;color:#b2f4f0;box-shadow:0 14px 35px #0003;font-size:12px;font-weight:600;line-height:1.5;animation:connect-tile-drift 7s ease-in-out infinite}
+.connect-art-text{right:25px;top:35px;transform:rotate(5deg);--art-rotation:5deg}
+.connect-art-voice{right:42px;bottom:34px;transform:rotate(-4deg);--art-rotation:-4deg;animation-delay:-3.5s}
+.connect-art-path{position:absolute;width:190px;height:120px;right:85px;top:85px;border:1px solid #57d5df35;border-radius:50%;transform:rotate(-30deg)}
+.connect-art-path>i{position:absolute;width:6px;height:6px;background:#54e1d4;border-radius:50%;box-shadow:0 0 16px #12c7b577;left:20px;top:16px}
+.connect-art-path>i:nth-child(2){left:110px;top:110px;background:#73aaff}
+.connect-art-path>i:nth-child(3){left:180px;top:40px}
+.connect-art-signature{position:absolute;bottom:26px;left:28px;display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:.14em;color:#a2bfd2}
+.connect-art-signature>span{width:5px;height:5px;background:#50ddcb;border-radius:50%}
+@keyframes connect-tile-drift{0%,100%{transform:translateY(0) rotate(var(--art-rotation))}50%{transform:translateY(-6px) rotate(var(--art-rotation))}}
+@media(max-width:767px){.yaaro-social .premium-profile .instagram-profile-top{padding:22px 20px 0;gap:18px}.yaaro-social .connect-premium-art{min-height:240px;padding:22px;margin-bottom:23px;border-radius:18px}.connect-art-title{font-size:29px;max-width:75%;margin-top:15px}.connect-art-text{top:135px;right:19px;padding:10px 13px;font-size:10px}.connect-art-voice{right:20px;top:19px;bottom:auto;padding:9px 11px;font-size:10px}.connect-art-voice>svg{width:16px}.connect-art-path{right:55px;top:104px;width:140px;height:90px}.connect-art-path>i:nth-child(2){left:80px;top:82px}.connect-art-path>i:nth-child(3){left:130px;top:28px}.connect-art-signature{left:22px;bottom:20px;font-size:8px}}
+@media(max-width:380px){.yaaro-social .premium-profile .instagram-profile-top{padding:20px 16px 0;gap:12px}.connect-art-title{font-size:25px}.connect-art-voice{gap:7px;padding:8px;font-size:9px}.connect-art-label{font-size:8px;letter-spacing:.15em}}
+@media(prefers-reduced-motion:reduce){.connect-art-tile{animation:none}}
+html[data-motion=off] .connect-art-tile{animation:none}
