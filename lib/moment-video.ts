@@ -36,3 +36,15 @@ export function sanitizeMomentVideo(bytes:Uint8Array){
  if(['udta','meta','uuid'].includes(type)){bytes.set([102,114,101,101],start+4);bytes.fill(0,start+header,next);}else if(['moov','trak','mdia','minf','stbl','edts'].includes(type))walk(start+header,next);start=next;}}
  validateMomentVideo(bytes);walk(0,bytes.length);return bytes;
 }
+
+// H.264 QuickTime containers share the same checked sample tables as MP4.
+// Normalize only the file brand; reject unsupported codecs/structure with the
+// existing validator instead of relabelling arbitrary MOV/HEVC content.
+export function normalizeMomentVideo(input:Uint8Array){
+ const bytes=input.slice();if(bytes.length<16||bytes.length>MAX_MOMENT_VIDEO_BYTES)throw new Error('VIDEO_INVALID');
+ const data=new DataView(bytes.buffer);let position=0;
+ while(position+8<=bytes.length){const size=data.getUint32(position),type=String.fromCharCode(...bytes.subarray(position+4,position+8));if(size<8||size>bytes.length-position)break;
+  if(type==='ftyp'){if(size<16)throw new Error('VIDEO_INVALID');if(String.fromCharCode(...bytes.subarray(position+8,position+12))==='qt  ')bytes.set([109,112,52,50],position+8);break;}position+=size;
+ }
+ validateMomentVideo(bytes);return bytes;
+}
