@@ -1,5 +1,5 @@
 import {supabaseServer} from '@/lib/supabase-server';
-import {safeReturnPath,validNativeAuthState} from '@/lib/auth-security';
+import {safeReturnPath,validNativeAuthState,nativeAuthScheme} from '@/lib/auth-security';
 import {env} from 'cloudflare:workers';
 export async function GET(request:Request){
   const url=new URL(request.url),origin=env.PUBLIC_APP_ORIGIN;
@@ -8,7 +8,9 @@ export async function GET(request:Request){
   const state=url.searchParams.get('native_state');
   if(state!==null){
     if(!validNativeAuthState(state))return new Response('Invalid app sign-in.',{status:400});
-    const link=new URL('com.yaaro.app://auth/callback');link.searchParams.set('state',state);
+    const scheme=nativeAuthScheme(url.searchParams.get('native_app'));
+    if(!scheme)return new Response('Invalid app identity.',{status:400});
+    const link=new URL(scheme+'://auth/callback');link.searchParams.set('state',state);
     if(code&&code.length<4096)link.searchParams.set('code',code);
     const href=link.href.replaceAll('&','&amp;').replaceAll('"','&quot;');
     // Chrome has no access to the app's PKCE verifier. Exchange only inside YAARO.

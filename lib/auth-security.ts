@@ -10,3 +10,9 @@ export function safeReturnPath(value:string|null|undefined):string{
 export function isSuperAdmin(user:{userId:string;email:string;emailVerified?:boolean}|null,configuredId:string|undefined){
   return !!user&&!!configuredId&&user.userId===configuredId&&user.emailVerified===true&&user.email.toLowerCase()==='haritre07@gmail.com';
 }
+
+// Only these installed app identities can receive the PKCE callback.
+export function nativeAuthScheme(value:string|null|undefined):string|null{
+ if(value==null)return 'com.yaaro.app';
+ return value==='com.edutantr.yaaro'||value==='com.yaaro.app'?value:null;
+}

@@ -1,11 +1,16 @@
 'use client';
 import {Capacitor} from '@capacitor/core';
-import {safeReturnPath,validNativeAuthState} from './auth-security';
+import {App} from '@capacitor/app';
+import {safeReturnPath,validNativeAuthState,nativeAuthScheme} from './auth-security';
 const KEY='yaaro-native-auth';
-export function nativeAuthRedirect(next:string){
+export async function nativeAuthRedirect(next:string){
   const callback=new URL('/auth/callback',location.origin);
   callback.searchParams.set('next',safeReturnPath(next));
   if(Capacitor.getPlatform()==='android'){
+    const info=await App.getInfo();
+    const scheme=nativeAuthScheme(info.id);
+    if(!scheme)throw Error('This YAARO app identity is unsupported. Install the current release.');
+    callback.searchParams.set('native_app',scheme);
     const state=crypto.randomUUID();
     localStorage.setItem(KEY,JSON.stringify({state,next:safeReturnPath(next),created:Date.now()}));
     callback.searchParams.set('native_state',state);

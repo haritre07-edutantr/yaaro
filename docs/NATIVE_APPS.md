@@ -5,7 +5,7 @@ Status: native projects and push integration are prepared. No signed APK/AAB/IPA
 ## Architecture
 
 - Capacitor 8 projects: `android/` and `ios/`.
-- Initial package and bundle identifier: `com.yaaro.app`. Confirm ownership before registering with Google/Apple; update Capacitor, Gradle and Xcode together if it changes.
+- Android application ID: `com.edutantr.yaaro` (registration availability must still be checked). Java namespace stays `com.yaaro.app`. iOS bundle identifier stays `com.yaaro.app`; Xcode signing and APNs configuration are unchanged.
 - The shell loads the existing HTTPS production `/community` page so authentication, uploads, messages and calls use the same server and UI. It requires an internet connection. `native/web/index.html` is the packaged recovery page; it is not an offline copy of the app.
 - Navigation is restricted to the configured origin. No mixed-content or cleartext access is enabled. Camera/microphone access still requires user consent.
 - Native notifications are explicitly enabled in Profile → Settings & privacy → App notifications. Browser notification settings continue to work separately.
@@ -16,7 +16,7 @@ Status: native projects and push integration are prepared. No signed APK/AAB/IPA
 ## Android configuration and build
 
 1. Install Node 22+, pnpm, JDK 21+, and Android Studio with Android SDK 36 and platform/build tools.
-2. Create/register a Firebase Android app with package `com.yaaro.app`. Put its downloaded configuration at `android/app/google-services.json` (ignored by Git).
+2. Create/register a Firebase Android app with package `com.edutantr.yaaro`. Put its downloaded configuration at `android/app/google-services.json` (ignored by Git).
 3. Enable Firebase Cloud Messaging HTTP v1. Create a service account permitted to send FCM messages. Store its JSON as the Cloudflare Worker secret `FCM_SERVICE_ACCOUNT`. Never put the service-account private key in the mobile app or repository.
 4. `pnpm install --frozen-lockfile`
 5. `pnpm native:doctor android` then `pnpm native:android` to build a debug APK. The output is `android/app/build/outputs/apk/debug/app-debug.apk`.
@@ -55,3 +55,7 @@ Migration `0012_native_push.sql` creates device registration and an atomic deliv
 - https://developer.android.com/develop/ui/compose/notifications/bubbles
 - https://firebase.google.com/docs/cloud-messaging/send/v1-api
 - https://developer.apple.com/documentation/usernotifications/establishing-a-token-based-connection-to-apns
+
+## Android application ID transition
+
+Download a new `google-services.json` for `com.edutantr.yaaro` in the existing Firebase project and place it in `android/app/`. Keep the original app registration and existing server FCM service account. The new APK installs as a separate Android app and requires sign-in and notification registration again; user profiles remain on the server. Use the existing release keystore. Check the new ID in Android Studio before public distribution. Native sign-in uses `App.getInfo().id` to select one of two fixed callback schemes; older Android builds retain their old callback. Supabase and Google continue to use the existing HTTPS callback.
