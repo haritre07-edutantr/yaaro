@@ -48,3 +48,10 @@ next-env.d.ts
 .dev.vars*
 !.dev.vars.example
 *.tsbuildinfo
+
+# Native signing and provider credentials
+android/app/google-services.json
+*.jks
+*.keystore
+*.p8
+*.mobileprovision

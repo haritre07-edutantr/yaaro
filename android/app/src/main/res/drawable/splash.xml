@@ -1,0 +1,1 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"><item android:drawable="@color/yaaro_navy"/><item><bitmap android:src="@drawable/yaaro_wordmark" android:gravity="center"/></item></layer-list>

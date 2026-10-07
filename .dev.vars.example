@@ -5,3 +5,11 @@ AUTH_EMAIL_DELIVERY_READY=false
 SUPER_ADMIN_USER_ID=
 TURN_URLS=
 TURN_SHARED_SECRET=
+
+# Optional native push configuration. Store real values as Worker secrets.
+FCM_SERVICE_ACCOUNT=
+APNS_PRIVATE_KEY=
+APNS_KEY_ID=
+APNS_TEAM_ID=
+APNS_BUNDLE_ID=com.yaaro.app
+APNS_ENVIRONMENT=production
