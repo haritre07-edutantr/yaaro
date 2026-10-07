@@ -3,7 +3,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
- @Override protected void onCreate(Bundle state){registerPlugin(YaaroChatPlugin.class);super.onCreate(state);if(!handleAuthIntent(getIntent()))handleConversationLaunch(getIntent());}
+ @Override protected void onCreate(Bundle state){registerPlugin(YaaroChatPlugin.class);registerPlugin(YaaroAudioPlugin.class);super.onCreate(state);if(!handleAuthIntent(getIntent()))handleConversationLaunch(getIntent());}
  private boolean handleAuthIntent(Intent intent){
   android.net.Uri uri=intent.getData();
   if(uri==null||!"com.yaaro.app".equals(uri.getScheme())||!"auth".equals(uri.getHost())||!"/callback".equals(uri.getPath()))return false;
