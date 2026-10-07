@@ -1,3 +1,6 @@
+export function validNativeAuthState(value:string|null|undefined):boolean{
+  return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
 export function safeReturnPath(value:string|null|undefined):string{
   if(!value||!value.startsWith('/')||value.startsWith('//')||/[\\\u0000-\u001f]/.test(value))return '/community';
   const url=new URL(value,'https://yaaro.invalid');
