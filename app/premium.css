@@ -190,3 +190,26 @@ html[data-theme=dark] .pending-retry{color:#91c3ff}
 .account-action-list{display:grid;gap:12px}.account-action{display:grid;grid-template-columns:44px minmax(0,1fr) 20px;align-items:center;gap:14px;width:100%;padding:18px 16px;border:1px solid var(--line);border-radius:16px;text-align:left;background:var(--bg);min-height:88px}.account-action:hover{border-color:var(--teal)}.account-action-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:color-mix(in srgb,var(--teal) 12%,transparent);color:var(--teal)}.account-action-copy{display:grid;gap:5px;min-width:0}.account-action-copy b{font-size:.95rem}.account-action-copy small{color:var(--muted);font-size:.8rem;line-height:1.6;overflow-wrap:anywhere}.account-action-delete .account-action-icon{color:#d36a76;background:color-mix(in srgb,#d36a76 12%,transparent)}
 .account-password-form{display:grid;gap:18px;min-width:0;text-align:left}.account-password-form>p{font-size:.9rem;line-height:1.7}.account-password-form label{display:grid;gap:8px;margin:0;font-size:.9rem;min-width:0}.account-password-form input{width:100%;min-width:0;min-height:50px;font-size:16px}.account-password-form>.button{width:100%;margin:4px 0 0;min-height:50px}.password-hint{font-size:.75rem;color:var(--muted)}.password-forgot{justify-self:center;padding:8px 12px;min-height:44px;font-size:.8rem;color:var(--blue);text-decoration:underline;text-underline-offset:3px}.password-error{padding:12px 14px;border:1px solid #d36a7660;background:#d36a7610;border-radius:12px;overflow-wrap:anywhere}.password-feedback{display:grid;gap:10px;margin-top:16px;padding:16px;border-radius:14px;background:color-mix(in srgb,var(--teal) 10%,transparent);font-size:.9rem}.password-recovery-page{min-height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:28px;padding:32px 20px}.password-recovery-card{width:min(100%,480px);padding:clamp(22px,5vw,36px);display:grid;gap:24px}.password-recovery-card h1{font-size:1.8rem}.password-recovery-card>p{line-height:1.7}
 @media(max-width:420px){.account-action{grid-template-columns:38px minmax(0,1fr) 18px;gap:10px;padding:15px 12px}.account-action-icon{width:38px;height:38px}.account-action-copy b{font-size:.9rem}.account-action-copy small{font-size:.76rem}}
+
+/* Account deletion: consistent reading width and mobile form alignment. */
+.account-deletion-page main{width:100%;max-width:760px;padding:clamp(32px,6vw,64px) clamp(20px,5vw,36px) calc(48px + env(safe-area-inset-bottom))}
+.account-deletion-page main>p,.account-deletion-page main section p{font-size:1rem;line-height:1.75;overflow-wrap:anywhere}
+.account-deletion-page main>section{margin-top:32px}
+.account-deletion-page main h2{font-size:clamp(1.15rem,3vw,1.4rem);line-height:1.35}
+.account-deletion-form{display:grid;gap:22px;margin-top:32px;padding:clamp(20px,4vw,28px);border:1px solid var(--line);border-radius:20px;background:var(--bg);min-width:0}
+.account-deletion-form header{display:grid;gap:10px}
+.account-deletion-form header p{font-size:.95rem;line-height:1.65}
+.account-deletion-form .account-deletion-confirm{display:grid;gap:10px;margin:0;font-size:.95rem;min-width:0}
+.account-deletion-confirm input{width:100%;min-width:0;min-height:52px;font-size:16px;margin:0}
+.account-deletion-form .account-deletion-agree{display:grid;grid-template-columns:20px minmax(0,1fr);align-items:start;gap:12px;margin:0;font-size:.875rem;font-weight:400;line-height:1.65;cursor:pointer}
+.account-deletion-agree input{width:20px;height:20px;min-width:20px;padding:0;margin:3px 0 0;accent-color:var(--blue)}
+.account-deletion-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.account-deletion-actions .button{width:100%;min-height:52px;margin:0;padding:13px 16px;white-space:normal;font-size:.95rem}
+.account-deletion-actions .account-deletion-submit{background:#b42332;border-color:#b42332;color:#fff;box-shadow:none}
+.account-deletion-actions .account-deletion-submit:not(:disabled):hover{background:#951c29;border-color:#951c29}
+.account-deletion-form .account-deletion-error{font-size:.9rem;line-height:1.6;padding:12px 14px;border:1px solid #b4233240;border-radius:12px;color:#b42332;background:#b423320a}
+.account-deletion-complete{display:grid;gap:16px}
+.account-deletion-complete .button{justify-self:start}
+html[data-theme=dark] .account-deletion-page{background:var(--bg)}
+html[data-theme=dark] .account-deletion-form{background:#101f30}
+html[data-theme=dark] .account-deletion-form .account-deletion-error{color:#ffb5be;background:#b423321a;border-color:#ffb5be40}
