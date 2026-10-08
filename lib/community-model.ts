@@ -28,7 +28,7 @@ export const actionSchema=z.discriminatedUnion('action',[
  z.object({action:z.literal('disappearing'),conversation:z.string().max(100),enabled:z.boolean()}),
  z.object({action:z.literal('block'),target:z.string().uuid()}),
  z.object({action:z.literal('unblock'),target:z.string().uuid()}),
- z.object({action:z.literal('report'),target:z.string().uuid(),category:z.enum(['Harassment','Spam','Scam/Fraud','Sexual Content','Threats','Fake Profile','Impersonation','Underage Safety Concern','Other']),description:z.string().max(2000)}),
+ z.object({action:z.literal('report'),target:z.string().uuid(),category:z.enum(['Harassment','Spam','Scam/Fraud','Sexual Content','Threats','Fake Profile','Impersonation','Underage Safety Concern','Child sexual abuse or exploitation','Other']),description:z.string().max(2000)}),
  z.object({action:z.literal('presence')})
 ]);
 export type Action=z.infer<typeof actionSchema>;
