@@ -6,7 +6,9 @@ public class MainActivity extends BridgeActivity {
  @Override protected void onCreate(Bundle state){registerPlugin(YaaroChatPlugin.class);registerPlugin(YaaroAudioPlugin.class);super.onCreate(state);if(!handleAuthIntent(getIntent()))handleConversationLaunch(getIntent());}
  private boolean handleAuthIntent(Intent intent){
   android.net.Uri uri=intent.getData();
-  if(uri==null||!"com.edutantr.yaaro".equals(uri.getScheme())||!"auth".equals(uri.getHost())||!"/callback".equals(uri.getPath()))return false;
+  if(uri==null||!"com.edutantr.yaaro".equals(uri.getScheme())||!"auth".equals(uri.getHost()))return false;
+  if("/login".equals(uri.getPath())){if(bridge!=null)bridge.getWebView().post(()->bridge.getWebView().loadUrl("https://autumn-lake-80feyaaro.haritre07.workers.dev/auth/login"));return true;}
+  if(!"/callback".equals(uri.getPath()))return false;
   String state=uri.getQueryParameter("state"),code=uri.getQueryParameter("code");
   if(state==null||!state.matches("[0-9a-fA-F-]{36}")||(code!=null&&code.length()>=4096)||bridge==null)return true;
   String target="https://autumn-lake-80feyaaro.haritre07.workers.dev/auth/native-return?state="+android.net.Uri.encode(state)+(code==null?"":"&code="+android.net.Uri.encode(code));

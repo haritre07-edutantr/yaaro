@@ -15,7 +15,7 @@ export async function POST(request:Request){
    if(typeof body.email!=='string'||body.email.length>254||!/^\S+@\S+\.\S+$/.test(body.email.trim()))throw Error('INVALID');
    await limit('recovery:'+await recoveryHash(body.email.trim().toLowerCase()));
    const isolated=createClient(config.url,config.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,flowType:'implicit'}});
-   const {error}=await isolated.auth.resetPasswordForEmail(body.email.trim());
+   const {error}=await isolated.auth.resetPasswordForEmail(body.email.trim(),{redirectTo:new URL('/auth/recovery?return_to='+ (body.returnTo==='android'?'android':'web'),request.url).href});
    if(error)throw Error(error.status===429?'RATE':'AUTH_UNAVAILABLE');
    return Response.json({message:'If this email belongs to a YAARO account, a password reset link will arrive shortly. Check your inbox and spam folder.'});
   }

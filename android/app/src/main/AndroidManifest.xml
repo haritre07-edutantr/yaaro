@@ -27,6 +27,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="com.edutantr.yaaro" android:host="auth" android:path="/callback" />
+                <data android:scheme="com.edutantr.yaaro" android:host="auth" android:path="/login" />
             </intent-filter>
 
         </activity>
