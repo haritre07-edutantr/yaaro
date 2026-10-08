@@ -48,3 +48,5 @@ export const spaceChannelFollows=sqliteTable('space_channel_follows',{channel:te
 export const spaceDiscussionFollows=sqliteTable('space_discussion_follows',{post:text('post').notNull().references(()=>spacePosts.id,{onDelete:'cascade'}),member:text('member').notNull().references(()=>members.id)},t=>[primaryKey({columns:[t.post,t.member]})]);
 
 export const accountDeletions=sqliteTable('account_deletions',{owner:text('owner').primaryKey(),member:text('member'),requestedAt:integer('requested_at').notNull(),completedAt:integer('completed_at')});
+
+export const passwordRecoveries=sqliteTable('password_recoveries',{ticketHash:text('ticket_hash').primaryKey(),owner:text('owner').notNull().unique(),expiresAt:integer('expires_at').notNull()});

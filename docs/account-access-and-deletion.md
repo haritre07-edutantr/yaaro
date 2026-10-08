@@ -8,7 +8,7 @@ In Cloudflare Workers → autumn-lake-80feyaaro → Settings → Variables and S
 
 ## Reviewer account
 
-Create a separate ordinary YAARO account using an email address you control. Sign in with the existing email link or Google, then Profile → Settings & privacy → Account & sign-in → Set password (at least 12 characters). Complete its display profile. Sign out and test Email & password in both the Android app and an incognito browser. Enter that account's email and password in Play Console App access. Do not use the administrator account. New password signups may need email confirmation once; the reviewer account must already be confirmed. No reviewer account or credentials are created automatically.
+Create a separate ordinary YAARO account using an email address you control. Sign in with the existing email link or Google, then Profile → Settings & privacy → Account & sign-in → Change password → Forgot password. Request a recovery link, then set a password from your email (at least 12 characters). Configure the recovery email template in docs/auth/password-recovery.md first. Complete its display profile. Sign out and test Email & password in both the Android app and an incognito browser. Enter that account's email and password in Play Console App access. Do not use the administrator account. New password signups may need email confirmation once; the reviewer account must already be confirmed. No reviewer account or credentials are created automatically.
 
 ## Deletion
 

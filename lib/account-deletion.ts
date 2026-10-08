@@ -35,6 +35,7 @@ export async function eraseAccountData(db:D1Database,owner:string){
   add('DELETE FROM space_members WHERE member=?',member);
   add("UPDATE members SET owner=?,name='Deleted account',dob='',languages='[]',interests='[]',bio='',vibe='',avatar='',photo_key=NULL,region='Prefer not to say',privacy=?,published=0,status='deleted',last_seen=0 WHERE id=?",'deleted:'+member,JSON.stringify({messages:'Nobody',calls:'Nobody',requests:'Nobody',discover:'Nobody',online:'Nobody'}),member);
  }
+ add('DELETE FROM password_recoveries WHERE owner=?',owner);
  for(const table of ['demo_workspaces','business_waitlist','product_events'])add(`DELETE FROM ${table} WHERE owner=?`,owner);
  // Safety evidence remains for abuse investigations; remove authentication identifiers.
  add('UPDATE reports SET owner=? WHERE owner=?','deleted-account',owner);
