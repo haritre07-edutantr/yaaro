@@ -7,6 +7,7 @@ declare namespace Cloudflare {
     APNS_BUNDLE_ID?: string;
     APNS_ENVIRONMENT?: string;
     SUPABASE_URL?: string;
+    SUPABASE_SECRET_KEY?: string;
     SUPABASE_PUBLISHABLE_KEY?: string;
     PUBLIC_APP_ORIGIN?: string;
     AUTH_EMAIL_DELIVERY_READY?: string;
